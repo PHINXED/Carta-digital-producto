@@ -2,23 +2,62 @@
 import AdminTabPerfil from "./AdminTabPerfil.astro";
 import AdminTabCategorias from "./AdminTabCategorias.astro";
 import AdminTabPlatos from "./AdminTabPlatos.astro";
+import AdminTabMenus from "./AdminTabMenus.astro";
 ---
 
-<div id="admin-panel" style="display: none">
-  <div class="tabs">
-    <button class="tab active" data-tab="perfil">Perfil</button>
-    <button class="tab" data-tab="categorias">Categorías</button>
-    <button class="tab" data-tab="platos">Platos</button>
+<div id="admin-panel" class="admin-shell" style="display: none">
+  <div class="tabs admin-tabs" role="tablist" aria-label="Secciones del panel">
+    <button class="tab active" data-tab="perfil" type="button">
+      <span class="tab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+          <path d="M8 3v4M16 3v4M4 10h16"></path>
+        </svg>
+      </span>
+      <span>Perfil</span>
+    </button>
+
+    <button class="tab" data-tab="categorias" type="button">
+      <span class="tab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M9 6h11M9 12h11M9 18h11"></path>
+          <path d="M4 6h.01M4 12h.01M4 18h.01"></path>
+        </svg>
+      </span>
+      <span>Categorias</span>
+    </button>
+
+    <button class="tab" data-tab="platos" type="button">
+      <span class="tab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M7 4v8"></path>
+          <path d="M4 4v5a3 3 0 0 0 6 0V4"></path>
+          <path d="M14 4l6 6"></path>
+          <path d="M20 4l-9 9"></path>
+        </svg>
+      </span>
+      <span>Catalogo (Platos)</span>
+    </button>
+
+    <button class="tab" data-tab="menus" type="button">
+      <span class="tab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="6" y="4" width="12" height="16" rx="2"></rect>
+          <path d="M9 8h6M9 12h6M9 16h4"></path>
+        </svg>
+      </span>
+      <span>Menus</span>
+    </button>
   </div>
 
-  <!-- TAB PERFIL -->
-  <AdminTabPerfil />
+  <div class="admin-tab-stack">
+    <AdminTabPerfil />
+    <AdminTabCategorias />
+    <AdminTabPlatos />
+    <AdminTabMenus />
+  </div>
 
-  <!-- TAB CATEGORÍAS -->
-  <AdminTabCategorias />
-
-  <!-- TAB PLATOS -->
-  <AdminTabPlatos />
-
-  <button id="logoutBtn">Cerrar Sesión</button>
+  <div class="admin-panel-footer">
+    <button id="logoutBtn" type="button">Cerrar sesion</button>
+  </div>
 </div>

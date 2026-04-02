@@ -1,360 +1,293 @@
 <div id="tab-perfil" class="tab-content active">
-  <div class="form-box profile-form">
-    <div class="form-header">
-      <div>
-        <h3>🏷️ Perfil del local</h3>
-        <p class="form-subtitle">
-          Datos generales, enlaces públicos y branding del negocio.
-        </p>
+  <section class="admin-page admin-page--profile">
+    <div class="form-box profile-shell">
+      <div class="panel-heading panel-heading--stack">
+        <div>
+          <h2>Perfil del local</h2>
+          <p>Ajustes visuales, enlaces publicos y branding del menu.</p>
+        </div>
       </div>
-    </div>
 
-    <section class="form-section">
-      <div class="section-header">
-        <h4>Datos básicos</h4>
-        <p class="section-hint">Nombre, teléfono, dirección y reseñas.</p>
-      </div>
-      <div class="section-body">
-        <div class="grid-2">
-          <div class="field">
-            <label>Nombre</label>
-            <input id="perfilNombre" placeholder="Nombre del bar/restaurante" />
-          </div>
-          <div class="field">
-            <label>Teléfono</label>
-            <input id="perfilTelefono" placeholder="+34 ..." />
+      <section class="form-section profile-block">
+        <div class="section-header section-header--stack">
+          <div>
+            <h4>Identificadores iServices</h4>
+            <p class="section-hint">URL publica del menu</p>
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="field">
-            <label>Dirección</label>
-            <input id="perfilDireccion" placeholder="Calle ..." />
-          </div>
-          <div class="field">
-            <label>URL valoraciones (Google Reviews, etc.)</label>
-            <input id="perfilReviews" placeholder="https://..." />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="form-section">
-      <div class="section-header">
-        <h4>Acceso y enlaces</h4>
-        <p class="section-hint">Identificadores y URL pública.</p>
-      </div>
-      <div class="section-body">
-        <div class="grid-2">
-          <div class="field">
-            <label>UID de cliente (solo lectura)</label>
-            <input id="perfilUid" readonly placeholder="-" />
-          </div>
-          <div class="field">
-            <label>Slug (solo lectura)</label>
-            <input id="perfilSlug" readonly placeholder="-" />
-          </div>
-        </div>
-
-        <div class="field">
-          <label>URL completa (solo lectura)</label>
-          <input id="perfilSlugUrl" readonly placeholder="https://..." />
-          <small class="hint">Copia y pega esta URL en el navegador.</small>
-        </div>
-
-        <div class="field">
-          <label>Google Place ID (para enlaces de reseñas)</label>
-          <div class="inline-actions">
-            <input id="perfilGooglePlaceId" placeholder="ChIJ..." />
-            <button type="button" id="buscarPlaceIdBtn" class="secondaryBtn">
-              Buscar Place ID
+        <div class="section-body">
+          <div class="profile-link-row">
+            <input id="perfilSlugUrl" readonly placeholder="https://..." />
+            <button type="button" id="perfilSlugCopyBtn" class="secondaryBtn">
+              Copiar
+            </button>
+            <button type="button" id="perfilSlugOpenBtn" class="secondaryBtn">
+              Abrir
             </button>
           </div>
-          <small class="hint">
-            Se usa para abrir Google Maps / escribir reseña automáticamente.
-          </small>
-        </div>
-      </div>
-    </section>
 
-    <section class="form-section">
-      <div class="section-header">
-        <h4>Wi‑Fi</h4>
-        <p class="section-hint">Datos visibles en la carta y PIN de acceso.</p>
-      </div>
-      <div class="section-body">
-        <div class="grid-2">
-          <div class="field">
-            <label>Wi‑Fi (nombre)</label>
-            <input id="perfilWifi" placeholder="Nombre de la red (SSID)" />
+          <div class="grid-2 profile-meta-grid">
+            <div class="field">
+              <label>Slug</label>
+              <input id="perfilSlug" readonly placeholder="-" />
+            </div>
+            <div class="field">
+              <label>UID del cliente</label>
+              <input id="perfilUid" readonly placeholder="-" />
+            </div>
           </div>
-          <div class="field">
-            <label>Wi‑Fi (clave)</label>
+        </div>
+      </section>
+
+      <section class="form-section profile-block">
+        <div class="section-header section-header--stack">
+          <div>
+            <h4>Datos del negocio</h4>
+            <p class="section-hint">
+              Informacion general del local, reseñas y acceso WiFi.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="grid-2">
+            <div class="field">
+              <label>Nombre</label>
+              <input id="perfilNombre" placeholder="Nombre del local" />
+            </div>
+            <div class="field">
+              <label>Telefono</label>
+              <input id="perfilTelefono" placeholder="+34 000 000 000" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Direccion</label>
+              <input id="perfilDireccion" placeholder="Calle, numero, ciudad" />
+            </div>
+            <div class="field">
+              <label>URL de resenas</label>
+              <input id="perfilReviews" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Google Place ID</label>
+              <div class="inline-actions">
+                <input id="perfilGooglePlaceId" placeholder="ChIJ..." />
+                <button type="button" id="buscarPlaceIdBtn" class="secondaryBtn">
+                  Buscar Place ID
+                </button>
+              </div>
+            </div>
+            <div class="field">
+              <label>WiFi (nombre de red)</label>
+              <input id="perfilWifi" placeholder="Nombre de la red" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>WiFi (clave)</label>
+              <input
+                id="perfilWifiPass"
+                type="text"
+                placeholder="Clave privada"
+                autocomplete="new-password"
+              />
+              <small class="hint">
+                La clave no se expone automaticamente en la carta.
+              </small>
+            </div>
+
+            <div class="field">
+              <label>WiFi (PIN de acceso)</label>
+              <div class="password-field">
+                <input
+                  id="perfilWifiPin"
+                  type="password"
+                  inputmode="numeric"
+                  autocomplete="new-password"
+                  placeholder="PIN de 4 a 8 digitos"
+                />
+                <button
+                  type="button"
+                  id="perfilWifiPinToggleBtn"
+                  class="icon-ghost-btn"
+                  aria-label="Mostrar PIN"
+                >
+                  Ver
+                </button>
+              </div>
+              <small class="hint">
+                Si escribes uno nuevo, sustituira al PIN anterior al guardar.
+              </small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section profile-block">
+        <div class="section-header section-header--stack">
+          <div>
+            <h4>Portada y platos</h4>
+            <p class="section-hint">
+              Portada principal, logo y foto por defecto para platos.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-body profile-media-grid">
+          <article class="profile-media-card">
+            <div class="profile-media-card__header">
+              <div>
+                <h5>Portada</h5>
+                <p>Hero principal del menu publico</p>
+              </div>
+            </div>
+
             <input
-              id="perfilWifiPass"
-              type="text"
-              placeholder="Clave (no se mostrará en la carta)"
-              autocomplete="new-password"
+              id="perfilPortadaUrl"
+              placeholder="Imagen seleccionada"
+              readonly
             />
-            <small class="hint">
-              La clave no se muestra en la carta; solo se puede copiar.
-            </small>
-          </div>
-        </div>
 
-        <div class="field">
-          <label>Wi‑Fi (PIN para ver clave)</label>
-          <input
-            id="perfilWifiPin"
-            type="text"
-            inputmode="numeric"
-            autocomplete="new-password"
-            placeholder="PIN (4-8 dígitos)"
-          />
-          <small class="hint">
-            Este PIN se usa en la carta para revelar la contraseña del Wi‑Fi.
-            Déjalo vacío si no quieres cambiarlo.
-          </small>
-        </div>
-      </div>
-    </section>
-
-    <section class="form-section">
-      <div class="section-header">
-        <h4>Branding</h4>
-        <p class="section-hint">
-          Color principal del panel y de la carta pública.
-        </p>
-      </div>
-      <div class="section-body">
-        <div class="field">
-          <label>Color principal</label>
-          <div class="color-palette" id="perfilColorPalette">
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #ffe800"
-              data-color="#FFE800"
-              aria-label="Amarillo"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #ff6b00"
-              data-color="#FF6B00"
-              aria-label="Naranja"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #f13f6f"
-              data-color="#F13F6F"
-              aria-label="Rosa"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #7d5cff"
-              data-color="#7D5CFF"
-              aria-label="Violeta"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #2d8cff"
-              data-color="#2D8CFF"
-              aria-label="Azul"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #10b981"
-              data-color="#10B981"
-              aria-label="Verde"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #dc2626"
-              data-color="#DC2626"
-              aria-label="Rojo"
-            ></button>
-            <button
-              type="button"
-              class="color-swatch"
-              style="--swatch: #111111"
-              data-color="#111111"
-              aria-label="Negro"
-            ></button>
-          </div>
-
-          <div class="color-picker-row">
-            <input id="perfilColorPrincipal" type="color" value="#ffe800" />
-            <span id="perfilColorPrincipalLabel">#FFE800</span>
-          </div>
-
-          <small class="hint">
-            Se aplica al admin y al fondo de la carta manteniendo contraste en
-            secciones y platos.
-          </small>
-        </div>
-      </div>
-    </section>
-
-    <section class="form-section">
-      <div class="section-header">
-        <h4>Portada</h4>
-        <p class="section-hint">URL directa o imagen desde Storage.</p>
-      </div>
-      <div class="section-body">
-        <div class="media-config-grid">
-          <article class="media-config-card media-config-card--cover">
-            <div class="media-config-head">
-              <h5>Portada principal</h5>
-              <p>Hero de la carta</p>
-            </div>
-            <div class="grid-2">
-              <div class="field">
-                <label>Portada (URL)</label>
-                <div class="media-url-actions">
-                  <input
-                    id="perfilPortadaUrl"
-                    placeholder="Imagen seleccionada"
-                    readonly
-                  />
-                  <button
-                    type="button"
-                    class="secondaryBtn"
-                    id="perfilPortadaGaleriaBtn"
-                  >
-                    Mis fotos
-                  </button>
-                  <button type="button" class="cancel" id="perfilPortadaClearBtn">
-                    Quitar
-                  </button>
-                </div>
-              </div>
-              <div class="field">
-                <label>Portada (subir imagen)</label>
-                <input id="perfilPortadaFile" type="file" accept="image/*" />
-                <small class="hint">
-                  Usa Storage (bucket) para subir sin tocar GitHub.
-                </small>
-              </div>
+            <div class="profile-media-card__actions">
+              <button
+                type="button"
+                class="secondaryBtn"
+                id="perfilPortadaGaleriaBtn"
+              >
+                Galeria de imagenes
+              </button>
+              <button type="button" class="cancel" id="perfilPortadaClearBtn">
+                Quitar
+              </button>
             </div>
 
+            <input id="perfilPortadaFile" type="file" accept="image/*" />
             <div
               id="perfilPortadaPreview"
-              class="image-preview"
+              class="image-preview image-preview--media"
               style="display: none"
             ></div>
           </article>
 
-          <article class="media-config-card">
-            <div class="media-config-head">
-              <h5>Logo / emblema</h5>
-              <p>Superpuesto en portada</p>
-            </div>
-            <div class="grid-2">
-              <div class="field">
-                <label>Logo / emblema (URL)</label>
-                <div class="media-url-actions">
-                  <input
-                    id="perfilLogoUrl"
-                    placeholder="Imagen seleccionada"
-                    readonly
-                  />
-                  <button
-                    type="button"
-                    class="secondaryBtn"
-                    id="perfilLogoGaleriaBtn"
-                  >
-                    Mis fotos
-                  </button>
-                  <button type="button" class="cancel" id="perfilLogoClearBtn">
-                    Quitar
-                  </button>
-                </div>
-                <small class="hint">
-                  Se muestra sobre la portada en la carta pública.
-                </small>
-              </div>
-              <div class="field">
-                <label>Logo / emblema (subir imagen)</label>
-                <input id="perfilLogoFile" type="file" accept="image/*" />
-                <small class="hint">
-                  Si no hay logo, simplemente no se muestra.
-                </small>
+          <article class="profile-media-card">
+            <div class="profile-media-card__header">
+              <div>
+                <h5>Logo</h5>
+                <p>Emblema o simbolo superpuesto</p>
               </div>
             </div>
 
+            <input id="perfilLogoUrl" placeholder="Imagen seleccionada" readonly />
+
+            <div class="profile-media-card__actions">
+              <button
+                type="button"
+                class="secondaryBtn"
+                id="perfilLogoGaleriaBtn"
+              >
+                Galeria de imagenes
+              </button>
+              <button type="button" class="cancel" id="perfilLogoClearBtn">
+                Quitar
+              </button>
+            </div>
+
+            <input id="perfilLogoFile" type="file" accept="image/*" />
             <div
               id="perfilLogoPreview"
-              class="image-preview"
+              class="image-preview image-preview--media"
               style="display: none"
             ></div>
           </article>
 
-          <article class="media-config-card">
-            <div class="media-config-head">
-              <h5>Imagen fallback de platos</h5>
-              <p>Solo si el plato no tiene foto</p>
-            </div>
-            <div class="grid-2">
-              <div class="field">
-                <label>Imagen por defecto de platos (URL)</label>
-                <div class="media-url-actions">
-                  <input
-                    id="perfilPlatoDefaultUrl"
-                    placeholder="Imagen seleccionada"
-                    readonly
-                  />
-                  <button
-                    type="button"
-                    class="secondaryBtn"
-                    id="perfilPlatoDefaultGaleriaBtn"
-                  >
-                    Mis fotos
-                  </button>
-                  <button
-                    type="button"
-                    class="cancel"
-                    id="perfilPlatoDefaultClearBtn"
-                  >
-                    Quitar
-                  </button>
-                </div>
-                <small class="hint">
-                  Se usa solo cuando un plato no tiene imagen propia.
-                </small>
-              </div>
-              <div class="field">
-                <label>Imagen por defecto de platos (subir imagen)</label>
-                <input
-                  id="perfilPlatoDefaultFile"
-                  type="file"
-                  accept="image/*"
-                />
-                <small class="hint">
-                  Si no subes ninguna, los platos sin foto se verán en blanco.
-                </small>
+          <article class="profile-media-card">
+            <div class="profile-media-card__header">
+              <div>
+                <h5>Imagen por defecto de platos</h5>
+                <p>Se usa cuando un plato no tiene foto propia</p>
               </div>
             </div>
 
+            <input
+              id="perfilPlatoDefaultUrl"
+              placeholder="Imagen seleccionada"
+              readonly
+            />
+
+            <div class="profile-media-card__actions">
+              <button
+                type="button"
+                class="secondaryBtn"
+                id="perfilPlatoDefaultGaleriaBtn"
+              >
+                Galeria de imagenes
+              </button>
+              <button
+                type="button"
+                class="cancel"
+                id="perfilPlatoDefaultClearBtn"
+              >
+                Quitar
+              </button>
+            </div>
+
+            <input id="perfilPlatoDefaultFile" type="file" accept="image/*" />
             <div
               id="perfilPlatoDefaultPreview"
-              class="image-preview"
+              class="image-preview image-preview--media"
               style="display: none"
             ></div>
           </article>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <div class="form-actions">
-      <button id="guardarPerfilBtn">Guardar Perfil</button>
+      <section class="form-section profile-block">
+        <div class="section-header section-header--stack">
+          <div>
+            <h4>Apariencia del menu publico</h4>
+            <p class="section-hint">
+              Color principal aplicado al admin y al menu publico.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="theme-preview" aria-hidden="true">
+            <div class="theme-preview__top"></div>
+            <div class="theme-preview__content">
+              <span class="theme-preview__badge">Vista previa</span>
+              <span class="theme-preview__line"></span>
+              <span class="theme-preview__line theme-preview__line--short"></span>
+            </div>
+          </div>
+
+          <div class="appearance-grid">
+            <div class="field appearance-grid__picker">
+              <label>Color del menu</label>
+              <div class="color-picker-row">
+                <input id="perfilColorPrincipal" type="color" value="#ffe800" />
+                <span id="perfilColorPrincipalLabel">#FFE800</span>
+              </div>
+              <small class="hint">
+                Selecciona directamente el color exacto que quieres aplicar.
+              </small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="form-actions profile-actions">
+        <button id="guardarPerfilBtn" type="button">Guardar perfil</button>
+      </div>
     </div>
-  </div>
+  </section>
 
   <div id="profileImageGalleryModal" class="imodal" aria-hidden="true">
     <button
@@ -367,22 +300,22 @@
       class="imodal-card imodal-card--gallery"
       role="dialog"
       aria-modal="true"
-      aria-label="Galería de imágenes"
+      aria-label="Galeria de imagenes"
     >
       <div class="imodal-header">
-        <h3 id="profileImageGalleryTitle" style="margin: 0">🖼️ Mis imágenes</h3>
+        <h3 id="profileImageGalleryTitle" style="margin: 0">Mis imagenes</h3>
         <button
           type="button"
           class="imodal-close"
           id="profileImageGalleryClose"
           aria-label="Cerrar"
         >
-          ✖
+          X
         </button>
       </div>
 
       <p class="hint" style="margin-top: 8px">
-        Selecciona una imagen para usarla aquí o bórrala si ya no la necesitas.
+        Selecciona una imagen para usarla aqui o borra la que ya no necesites.
       </p>
 
       <div class="plato-gallery-toolbar">

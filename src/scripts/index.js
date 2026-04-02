@@ -11,11 +11,25 @@ window.imenuPublic = { supabase };
 
 const db = supabase.schema("iMenu");
 const params = new URLSearchParams(window.location.search);
+
+function getPathClienteParam() {
+  const parts = window.location.pathname
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length >= 2 && parts[parts.length - 1].toLowerCase() === "menu") {
+    return parts[parts.length - 2] || "";
+  }
+  return "";
+}
+
 // Compatibilidad:
+// - /<slug>/menu
 // - ?cliente=<uuid> (modo antiguo)
 // - ?cliente=<slug> (nuevo: friendly)
 // - ?bar=<slug>
-const clienteParam = params.get("cliente") || params.get("bar");
+const clienteParam =
+  getPathClienteParam() || params.get("cliente") || params.get("bar");
 
 function isUuid(v) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
@@ -287,7 +301,15 @@ const BASE_HREF = (() => {
   if (href && href !== "/") return href.endsWith("/") ? href : `${href}/`;
   const path = window.location.pathname;
   const parts = path.split("/").filter(Boolean);
-  return parts.length ? `/${parts[0]}/` : "/";
+  if (!parts.length) return "/";
+  const last = parts[parts.length - 1];
+  if (last.includes(".")) parts.pop();
+  if (parts[parts.length - 1]?.toLowerCase() === "menu") parts.pop();
+  if (parts.length && !parts[parts.length - 1].includes(".")) {
+    const maybeSlug = parts[parts.length - 1];
+    if (maybeSlug && maybeSlug !== "index") parts.pop();
+  }
+  return parts.length ? `/${parts.join("/")}/` : "/";
 })();
 
 function baseUrl(path) {

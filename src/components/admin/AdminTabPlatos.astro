@@ -1,91 +1,142 @@
 <div id="tab-platos" class="tab-content">
-  <div class="form-box">
-    <div class="form-header">
-      <div>
-        <h3 id="plato-form-title">➕ Nuevo Plato</h3>
-        <p class="form-subtitle">Añade platos con imágenes y alérgenos.</p>
-      </div>
-    </div>
-    <div class="edit-grid">
-      <aside id="platoEditAside" class="edit-aside" style="display: none">
-        <div class="edit-aside-title">Editando</div>
-        <div id="platoEditAsideBody" class="edit-aside-body"></div>
-      </aside>
+  <section class="admin-page admin-page--split">
+    <aside class="admin-page__sidebar admin-page__sidebar--wide">
+      <div class="form-box admin-sticky-card">
+        <div class="panel-heading panel-heading--stack">
+          <div>
+            <h2 id="plato-form-title">Nuevo plato</h2>
+            <p>Crea platos con imagen, precio y alergenos.</p>
+          </div>
+        </div>
 
-      <div class="edit-main">
+        <aside id="platoEditAside" class="edit-aside" style="display: none">
+          <div class="edit-aside-title">Editando</div>
+          <div id="platoEditAsideBody" class="edit-aside-body"></div>
+        </aside>
+
         <input type="hidden" id="editPlatoId" />
+
         <div class="form-stack">
-          <input id="platoNombre" placeholder="Nombre del plato" />
-          <input id="platoDescripcion" placeholder="Descripción" />
-          <input
-            id="platoPrecio"
-            type="number"
-            step="0.01"
-            placeholder="Precio (€)"
-          />
-          <input
-            id="platoSubcategoria"
-            placeholder="Subcategoría (ej: Para picar)"
-          />
           <div class="field">
-            <label for="platoCategoria">Categorías (puedes elegir varias)</label>
-            <select id="platoCategoria" multiple size="6"></select>
+            <label for="platoNombre">Nombre del plato</label>
+            <input id="platoNombre" placeholder="Nombre del plato" />
+          </div>
+
+          <div class="field">
+            <label for="platoDescripcion">Descripcion</label>
+            <input id="platoDescripcion" placeholder="Descripcion" />
+          </div>
+
+          <div class="field">
+            <label for="platoPrecio">Precio (EUR)</label>
+            <input
+              id="platoPrecio"
+              type="number"
+              step="0.01"
+              placeholder="Precio (EUR)"
+            />
+          </div>
+
+          <div class="field">
+            <label for="platoSubcategoria">Subcategoria</label>
+            <input
+              id="platoSubcategoria"
+              placeholder="Subcategoria (ej. Especial)"
+            />
+          </div>
+
+          <div class="field">
+            <label for="platoCategoria">Categorias</label>
+            <select id="platoCategoria" multiple size="8"></select>
             <small class="hint">
-              Usa `Ctrl` (Windows) o `Cmd` (Mac) para seleccionar varias.
+              Puedes seleccionar varias categorias con `Ctrl` o `Cmd`.
             </small>
           </div>
 
           <div class="field plato-image-field">
             <label>Imagen del plato</label>
             <div class="plato-image-actions">
-              <button type="button" class="secondaryBtn" id="platoImagenGaleriaBtn">
-                Elegir de mis fotos
+              <button
+                type="button"
+                class="secondaryBtn"
+                id="platoImagenGaleriaBtn"
+              >
+                Galeria de imagenes
               </button>
-              <button type="button" class="secondaryBtn" id="platoImagenUploadBtn">
-                Subir nueva imagen
+              <button
+                type="button"
+                class="secondaryBtn"
+                id="platoImagenUploadBtn"
+              >
+                Subir imagen
               </button>
               <button type="button" class="cancel" id="platoImagenClearBtn">
                 Quitar imagen
               </button>
             </div>
+
             <input
               id="platoImagenFile"
               class="sr-only-file"
               type="file"
               accept="image/*"
             />
+
             <input id="platoImagenUrl" placeholder="Imagen seleccionada" readonly />
             <small id="platoImagenStatus" class="hint">Sin imagen seleccionada.</small>
           </div>
+
           <div id="platoImagenPreview" class="image-preview" style="display: none"></div>
 
           <div class="alergenos-section">
-            <label>🔴 Alérgenos (haz clic para seleccionar):</label>
+            <label>Alergenos</label>
             <div class="alergenos-grid" id="alergenosGrid"></div>
           </div>
         </div>
 
         <div class="form-actions">
-          <button id="guardarPlatoBtn">Guardar</button>
-          <button class="cancel" id="cancelPlatoBtn" style="display: none">
+          <button id="guardarPlatoBtn" type="button">Guardar plato</button>
+          <button
+            class="cancel"
+            id="cancelPlatoBtn"
+            type="button"
+            style="display: none"
+          >
             Cancelar
           </button>
         </div>
       </div>
+    </aside>
+
+    <div class="admin-page__main">
+      <div class="content-card list-panel">
+        <div class="panel-heading panel-heading--stack">
+          <div>
+            <h2>Platos registrados</h2>
+            <p>Busca y filtra por categoria en tiempo real.</p>
+          </div>
+        </div>
+
+        <div class="platos-toolbar">
+          <label class="toolbar-field">
+            <span>Categoria</span>
+            <select id="platosCategoriaFilter"></select>
+          </label>
+
+          <label class="toolbar-field toolbar-field--grow">
+            <span>Buscar plato</span>
+            <input
+              id="platosSearch"
+              type="search"
+              placeholder="Nombre o descripcion"
+            />
+          </label>
+        </div>
+
+        <div id="platosContainer" class="platos-list"></div>
+      </div>
     </div>
-  </div>
-
-  <!-- Toolbar (filtro + buscador) -->
-  <div class="platos-toolbar">
-    <label>
-      Categoría:
-      <select id="platosCategoriaFilter"></select>
-    </label>
-
-    <input id="platosSearch" type="search" placeholder="Buscar plato..." />
-  </div>
-
-  <div id="platosContainer"></div>
+  </section>
 
   <div id="platoImagenGalleryModal" class="imodal" aria-hidden="true">
     <button
@@ -98,22 +149,23 @@
       class="imodal-card imodal-card--gallery"
       role="dialog"
       aria-modal="true"
-      aria-label="Galería de imágenes de platos"
+      aria-label="Galeria de imagenes de platos"
     >
       <div class="imodal-header">
-        <h3 style="margin: 0">🖼️ Mis imágenes de platos</h3>
+        <h3 style="margin: 0">Mis imagenes de platos</h3>
         <button
           type="button"
           class="imodal-close"
           id="platoImagenGalleryClose"
           aria-label="Cerrar"
         >
-          ✖
+          X
         </button>
       </div>
 
       <p class="hint" style="margin-top: 8px">
-        Selecciona una imagen ya subida para reutilizarla o bórrala si ya no la quieres.
+        Selecciona una imagen ya subida para reutilizarla o borrala si ya no la
+        quieres.
       </p>
 
       <div class="plato-gallery-toolbar">

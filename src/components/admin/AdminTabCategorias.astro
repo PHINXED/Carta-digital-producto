@@ -1,22 +1,51 @@
 <div id="tab-categorias" class="tab-content">
-  <div class="form-box">
-    <div class="form-header">
-      <div>
-        <h3 id="categoria-form-title">➕ Nueva Categoría</h3>
-        <p class="form-subtitle">Organiza el menú por secciones.</p>
+  <section class="admin-page admin-page--split">
+    <aside class="admin-page__sidebar">
+      <div class="form-box admin-sticky-card">
+        <div class="panel-heading panel-heading--stack">
+          <div>
+            <h2 id="categoria-form-title">Nueva categoria</h2>
+            <p>Crea categorias y organiza visualmente sus subcategorias.</p>
+          </div>
+        </div>
+
+        <input type="hidden" id="editCategoriaId" />
+
+        <div class="form-stack">
+          <div class="field">
+            <label for="categoriaNombre">Nombre de la categoria</label>
+            <input id="categoriaNombre" placeholder="Nombre de categoria" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="guardarCategoriaBtn" type="button">Guardar categoria</button>
+          <button
+            class="cancel"
+            id="cancelCategoriaBtn"
+            type="button"
+            style="display: none"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-page__main">
+      <div class="content-card list-panel">
+        <div class="panel-heading panel-heading--stack">
+          <div>
+            <h2>Categorias registradas</h2>
+            <p>
+              Cada tarjeta resume las categorias activas y las subcategorias
+              detectadas en tus platos.
+            </p>
+          </div>
+        </div>
+
+        <div id="categoriasContainer" class="category-list"></div>
       </div>
     </div>
-    <input type="hidden" id="editCategoriaId" />
-    <div class="form-stack">
-      <input id="categoriaNombre" placeholder="Nombre de la categoría" />
-    </div>
-    <div class="form-actions">
-      <button id="guardarCategoriaBtn">Guardar</button>
-      <button class="cancel" id="cancelCategoriaBtn" style="display: none">
-        Cancelar
-      </button>
-    </div>
-  </div>
-
-  <div id="categoriasContainer"></div>
+  </section>
 </div>

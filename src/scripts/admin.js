@@ -109,11 +109,14 @@ const perfilNombre = document.getElementById("perfilNombre");
 const perfilUid = document.getElementById("perfilUid");
 const perfilSlug = document.getElementById("perfilSlug");
 const perfilSlugUrl = document.getElementById("perfilSlugUrl");
+const perfilSlugCopyBtn = document.getElementById("perfilSlugCopyBtn");
+const perfilSlugOpenBtn = document.getElementById("perfilSlugOpenBtn");
 const perfilTelefono = document.getElementById("perfilTelefono");
 const perfilDireccion = document.getElementById("perfilDireccion");
 const perfilWifi = document.getElementById("perfilWifi");
 const perfilWifiPass = document.getElementById("perfilWifiPass");
 const perfilWifiPin = document.getElementById("perfilWifiPin");
+const perfilWifiPinToggleBtn = document.getElementById("perfilWifiPinToggleBtn");
 const perfilReviews = document.getElementById("perfilReviews");
 const perfilPortadaUrl = document.getElementById("perfilPortadaUrl");
 const perfilPortadaFile = document.getElementById("perfilPortadaFile");
@@ -421,7 +424,7 @@ function getCurrentPrimaryColor() {
   );
 }
 
-const BASE_HREF = (() => {
+function getAppBaseHref() {
   const envBase =
     typeof import.meta !== "undefined" && import.meta.env
       ? import.meta.env.BASE_URL
@@ -433,8 +436,13 @@ const BASE_HREF = (() => {
   if (href && href !== "/") return href.endsWith("/") ? href : `${href}/`;
   const path = window.location.pathname;
   const parts = path.split("/").filter(Boolean);
-  return parts.length ? `/${parts[0]}/` : "/";
-})();
+  if (!parts.length) return "/";
+  const last = parts[parts.length - 1];
+  if (last.includes(".")) parts.pop();
+  return parts.length ? `/${parts.join("/")}/` : "/";
+}
+
+const BASE_HREF = getAppBaseHref();
 
 function assetUrl(path) {
   const clean = String(path || "").replace(/^\//, "");
@@ -971,6 +979,57 @@ function categoriaNombreById(id) {
   return c?.nombre || "";
 }
 
+function formatMoneyEur(value) {
+  if (value == null || value === "") return "";
+  const num = Number(value);
+  if (!Number.isFinite(num)) return "";
+  return `${num.toFixed(2)} EUR`;
+}
+
+function renderAdminAllergenBadges(allergens = []) {
+  const items = Array.isArray(allergens) ? allergens : [];
+  const icons = items
+    .map((item) => normalizeAllergenKey(item))
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((key) => {
+      const label = key.replace(/_/g, " ");
+      const url = assetUrl(`alergenos/${key}.svg`);
+      return `
+        <span class="plato-alergeno-badge" title="${label}">
+          <img src="${url}" alt="${label}" loading="lazy" onerror="this.parentElement.textContent='•'"/>
+        </span>
+      `;
+    })
+    .join("");
+
+  if (!icons) return "";
+  return `<div class="plato-alergenos">${icons}</div>`;
+}
+
+function getCategorySubcategories(categoryId) {
+  const bucket = new Map();
+
+  ALL_PLATOS.forEach((plato) => {
+    if (!getPlatoCategoryIds(plato).includes(Number(categoryId))) return;
+    const name = safeText(plato.subcategoria).trim();
+    if (!name) return;
+
+    const current = bucket.get(name) || {
+      name,
+      total: 0,
+      active: 0,
+    };
+    current.total += 1;
+    if (plato.activo) current.active += 1;
+    bucket.set(name, current);
+  });
+
+  return [...bucket.values()].sort((a, b) =>
+    a.name.localeCompare(b.name, "es", { sensitivity: "base" }),
+  );
+}
+
 async function uploadToStorage(file, folder) {
   if (!file) return null;
   if (!(file instanceof File)) {
@@ -1113,7 +1172,15 @@ async function cargarPerfil() {
     if (perfilWifiPass) perfilWifiPass.value = safeText(data.wifi_pass);
 
     // El PIN no se puede leer (se guarda hasheado). Déjalo en blanco.
-    if (perfilWifiPin) perfilWifiPin.value = "";
+    if (perfilWifiPin) {
+      perfilWifiPin.value = "";
+      perfilWifiPin.type = "password";
+    }
+    if (perfilWifiPinToggleBtn) {
+      perfilWifiPinToggleBtn.classList.remove("is-active");
+      perfilWifiPinToggleBtn.textContent = "Ver";
+      perfilWifiPinToggleBtn.setAttribute("aria-label", "Mostrar PIN");
+    }
 
     perfilReviews.value = safeText(data.reviews_url);
     setProfileMediaFromUrl("portada", safeText(data.portada_url));
@@ -1199,6 +1266,40 @@ perfilLogoClearBtn?.addEventListener("click", () => {
 });
 perfilPlatoDefaultClearBtn?.addEventListener("click", () => {
   setProfileMediaFromUrl("platoDefault", "");
+});
+
+perfilSlugCopyBtn?.addEventListener("click", async () => {
+  const url = safeText(perfilSlugUrl?.value).trim();
+  if (!url) return;
+
+  try {
+    await navigator.clipboard.writeText(url);
+    const originalText = perfilSlugCopyBtn.textContent;
+    perfilSlugCopyBtn.textContent = "Copiado";
+    window.setTimeout(() => {
+      perfilSlugCopyBtn.textContent = originalText;
+    }, 1400);
+  } catch (error) {
+    console.warn("Copiar URL:", error?.message || error);
+  }
+});
+
+perfilSlugOpenBtn?.addEventListener("click", () => {
+  const url = safeText(perfilSlugUrl?.value).trim();
+  if (!url) return;
+  window.open(url, "_blank", "noopener");
+});
+
+perfilWifiPinToggleBtn?.addEventListener("click", () => {
+  if (!perfilWifiPin) return;
+  const shouldShow = perfilWifiPin.type === "password";
+  perfilWifiPin.type = shouldShow ? "text" : "password";
+  perfilWifiPinToggleBtn.classList.toggle("is-active", shouldShow);
+  perfilWifiPinToggleBtn.textContent = shouldShow ? "Ocultar" : "Ver";
+  perfilWifiPinToggleBtn.setAttribute(
+    "aria-label",
+    shouldShow ? "Ocultar PIN" : "Mostrar PIN",
+  );
 });
 
 profileImageGalleryBackdrop?.addEventListener("click", closeProfileImageGalleryModal);
@@ -1546,15 +1647,25 @@ async function cargarCategorias() {
   }
 
   ALL_CATEGORIAS = categorias || [];
+  renderCategoriasList();
 
+  // Select del form de platos + select del filtro
+  actualizarSelectCategorias(ALL_CATEGORIAS);
+  fillPlatosCategoriaFilter(ALL_CATEGORIAS);
+}
+
+function renderCategoriasList() {
   const container = document.getElementById("categoriasContainer");
+  if (!container) return;
   container.innerHTML = "";
 
   if (!ALL_CATEGORIAS.length) {
     container.innerHTML =
-      '<div class="empty-state">No hay categorías. ¡Crea la primera!</div>';
-    actualizarSelectCategorias([]);
-    fillPlatosCategoriaFilter([]);
+      '<div class="empty-state empty-state--panel">No hay categorias. Crea la primera para empezar.</div>';
+    if (sortableCategorias) {
+      sortableCategorias.destroy();
+      sortableCategorias = null;
+    }
     return;
   }
 
@@ -1562,13 +1673,68 @@ async function cargarCategorias() {
     const div = document.createElement("div");
     div.className = "categoria-item" + (cat.activa ? "" : " inactiva");
     div.dataset.id = cat.id;
+    const subcategorias = getCategorySubcategories(cat.id);
+    const activeSubcategories = subcategorias.filter((item) => item.active > 0).length;
+    const dishesCount = ALL_PLATOS.filter((plato) =>
+      getPlatoCategoryIds(plato).includes(Number(cat.id)),
+    ).length;
+    const subcategoriesHtml = subcategorias.length
+      ? `
+        <div class="category-card__subsection">
+          <div class="category-card__subheading">Subcategorias</div>
+          <div class="category-card__sublist">
+            ${subcategorias
+              .map(
+                (item) => `
+                  <div class="category-card__subitem">
+                    <div class="category-card__subitem-name">${safeText(item.name)}</div>
+                    <div class="category-card__subitem-meta">${item.active}/${item.total} platos activos</div>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </div>
+      `
+      : `
+        <div class="category-card__subsection">
+          <div class="category-card__subheading">Subcategorias</div>
+          <div class="category-card__empty">Todavia no hay subcategorias detectadas en esta categoria.</div>
+        </div>
+      `;
+
     div.innerHTML = `
-      <span class="drag-handle">☰</span>
-      <div class="categoria-nombre">${cat.nombre} ${cat.activa ? "" : "(Desactivada)"}</div>
-      <div class="categoria-actions">
-        <button class="btn-editar" data-id="${cat.id}">✏️ Editar</button>
-        <button class="btn-toggle" data-id="${cat.id}">${cat.activa ? "👁️ Ocultar" : "👁️ Mostrar"}</button>
-        <button class="btn-eliminar" data-id="${cat.id}">🗑️ Eliminar</button>
+      <div class="category-card__main">
+        <span class="drag-handle">☰</span>
+
+        <div class="category-card__content">
+          <div class="category-card__header">
+            <div>
+              <div class="category-card__title">${safeText(cat.nombre)}</div>
+              <div class="category-card__meta">
+                <span class="status-pill ${cat.activa ? "is-on" : ""}">${cat.activa ? "Visible" : "Oculta"}</span>
+                <span class="meta-pill">${activeSubcategories}/${subcategorias.length || 0} subcategorias activas</span>
+                <span class="meta-pill">${dishesCount} platos vinculados</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-editar" data-id="${cat.id}" type="button">Editar</button>
+              <button
+                class="btn-toggle toggle-switch ${cat.activa ? "is-on" : ""}"
+                data-id="${cat.id}"
+                type="button"
+                aria-label="${cat.activa ? "Ocultar categoria" : "Mostrar categoria"}"
+              >
+                <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+                <span class="toggle-switch__label">Activo</span>
+              </button>
+              <button class="btn-eliminar" data-id="${cat.id}" type="button">Eliminar</button>
+            </div>
+          </div>
+
+          ${subcategoriesHtml}
+        </div>
       </div>
     `;
     container.appendChild(div);
@@ -1583,10 +1749,6 @@ async function cargarCategorias() {
   container
     .querySelectorAll(".btn-eliminar")
     .forEach((btn) => (btn.onclick = () => eliminarCategoria(btn.dataset.id)));
-
-  // Select del form de platos + select del filtro
-  actualizarSelectCategorias(ALL_CATEGORIAS);
-  fillPlatosCategoriaFilter(ALL_CATEGORIAS);
 
   // Sortable (móvil y PC)
   makeSortableCategorias(container);
@@ -1635,14 +1797,14 @@ function editarCategoria(id) {
   const cat = ALL_CATEGORIAS.find((c) => String(c.id) === String(id));
   editCategoriaId.value = id;
   categoriaNombre.value = cat?.nombre || "";
-  categoriaFormTitle.textContent = "✏️ Editar Categoría";
+  categoriaFormTitle.textContent = "Editar categoria";
   cancelCategoriaBtn.style.display = "";
 }
 
 cancelCategoriaBtn.onclick = () => {
   editCategoriaId.value = "";
   categoriaNombre.value = "";
-  categoriaFormTitle.textContent = "➕ Nueva Categoría";
+  categoriaFormTitle.textContent = "Nueva categoria";
   cancelCategoriaBtn.style.display = "none";
 };
 
@@ -1716,7 +1878,7 @@ function resetPlatoForm() {
     opt.selected = false;
   });
   setPlatoImageFromUrl("", { status: "Sin imagen seleccionada." });
-  platoFormTitle.textContent = "➕ Nuevo Plato";
+  platoFormTitle.textContent = "Nuevo plato";
   cancelPlatoBtn.style.display = "none";
   alergenosSeleccionados = [];
   cargarAlergenosGrid();
@@ -1773,6 +1935,7 @@ async function cargarPlatos() {
   }
 
   ALL_PLATOS = platos || [];
+  renderCategoriasList();
   renderPlatosFiltrados();
 }
 
@@ -1801,7 +1964,7 @@ function renderPlatosList(platos) {
 
   if (!platos || !platos.length) {
     container.innerHTML =
-      '<div class="empty-state">No hay platos con este filtro.</div>';
+      '<div class="empty-state empty-state--panel">No hay platos con este filtro.</div>';
     if (sortablePlatos) {
       sortablePlatos.destroy();
       sortablePlatos = null;
@@ -1815,29 +1978,51 @@ function renderPlatosList(platos) {
     div.dataset.id = p.id;
 
     const img = p.imagen_url
-      ? `<img src="${p.imagen_url}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:10px;margin-right:10px" onerror="this.style.display='none';this.parentElement.style.background='transparent'"/>`
-      : "";
+      ? `
+        <div class="plato-thumb">
+          <img src="${p.imagen_url}" alt="" onerror="this.style.display='none';this.parentElement.classList.add('plato-thumb--empty')"/>
+        </div>
+      `
+      : '<div class="plato-thumb plato-thumb--empty"></div>';
 
     const catNames = getPlatoCategoryIds(p)
       .map((id) => categoriaNombreById(id))
       .filter(Boolean);
+    const allergenBadges = renderAdminAllergenBadges(p.alergenos);
 
     div.innerHTML = `
-      <span class="drag-handle">☰</span>
-      ${img}
-      <div class="plato-info">
-        <div class="plato-nombre">${safeText(p.plato)} ${p.activo ? "" : "(Oculto)"}</div>
-        <div class="plato-desc">${p.descripcion ? safeText(p.descripcion) : ""}</div>
-        <div class="plato-meta">
-          ${catNames.map((name) => `<span class="badge-cat">${name}</span>`).join("")}
-          ${p.subcategoria ? `<span class="chipmini">${safeText(p.subcategoria)}</span>` : ""}
+      <div class="plato-card__main">
+        <span class="drag-handle">☰</span>
+        ${img}
+
+        <div class="plato-card__content">
+          <div class="plato-nombre">${safeText(p.plato)}</div>
+          <div class="plato-desc">${p.descripcion ? safeText(p.descripcion) : "Sin descripcion."}</div>
+          ${allergenBadges}
+          <div class="plato-meta">
+            ${catNames.map((name) => `<span class="badge-cat">${name}</span>`).join("")}
+            ${p.subcategoria ? `<span class="chipmini">${safeText(p.subcategoria)}</span>` : ""}
+            ${p.activo ? "" : '<span class="meta-pill">Oculto</span>'}
+          </div>
         </div>
-      </div>
-      <div class="plato-precio">${p.precio != null ? Number(p.precio).toFixed(2) + " €" : ""}</div>
-      <div class="plato-actions">
-        <button class="btn-editar" data-id="${p.id}">✏️</button>
-        <button class="btn-toggle" data-id="${p.id}">${p.activo ? "👁️" : "🙈"}</button>
-        <button class="btn-eliminar" data-id="${p.id}">🗑️</button>
+
+        <div class="plato-card__price">
+          <div class="plato-precio">${formatMoneyEur(p.precio)}</div>
+        </div>
+
+        <div class="plato-actions card-actions plato-card__actions">
+          <button class="btn-editar" data-id="${p.id}" type="button">Editar</button>
+          <button
+            class="btn-toggle toggle-switch ${p.activo ? "is-on" : ""}"
+            data-id="${p.id}"
+            type="button"
+            aria-label="${p.activo ? "Ocultar plato" : "Mostrar plato"}"
+          >
+            <span class="toggle-switch__track"><span class="toggle-switch__thumb"></span></span>
+            <span class="toggle-switch__label">Activo</span>
+          </button>
+          <button class="btn-eliminar" data-id="${p.id}" type="button">Eliminar</button>
+        </div>
       </div>
     `;
 
@@ -1912,7 +2097,7 @@ function editarPlato(id) {
     platoEditAside.style.display = "";
   }
 
-  platoFormTitle.textContent = "✏️ Editar Plato";
+  platoFormTitle.textContent = "Editar plato";
   cancelPlatoBtn.style.display = "";
 }
 
