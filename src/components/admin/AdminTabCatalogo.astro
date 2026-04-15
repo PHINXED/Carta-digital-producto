@@ -1,0 +1,111 @@
+<div id="tab-catalogo" class="tab-content">
+  <div class="catalog-grid">
+    <section class="catalog-left" id="platoFormDock">
+      <div class="form-box" id="platoEditorFormBox">
+        <div class="form-header">
+          <div>
+            <h3 id="plato-form-title">Nuevo plato</h3>
+            <p class="form-subtitle">Crea platos con imagen, precio y alergenos.</p>
+          </div>
+        </div>
+
+        <aside id="platoEditAside" class="edit-aside" style="display: none">
+          <div class="edit-aside-title">Editando</div>
+          <div id="platoEditAsideBody" class="edit-aside-body"></div>
+        </aside>
+
+        <input type="hidden" id="editPlatoId" />
+        <div class="form-stack">
+          <input id="platoNombre" placeholder="Nombre del plato" />
+          <input id="platoDescripcion" placeholder="Descripcion" />
+          <input id="platoPrecio" type="number" step="0.01" placeholder="Precio (EUR)" />
+          <div class="field">
+            <label>Categorias</label>
+            <div id="platoCategoriaChecklist" class="multi-category-checklist"></div>
+            <small class="hint">Puedes seleccionar una o varias categorias.</small>
+          </div>
+          <div class="field">
+            <label>Subcategorias</label>
+            <div id="platoSubcategoriaChecklist" class="subcat-checklist-groups">
+              <div class="empty-state">Selecciona una categoria primero</div>
+            </div>
+            <small id="platoSubcategoriaHint" class="hint">
+              Primero selecciona al menos una categoria para habilitar subcategorias.
+            </small>
+          </div>
+
+          <div class="field">
+            <label>Imagen del plato</label>
+            <input id="platoImagenUrl" placeholder="Selecciona una imagen desde la galeria" readonly />
+            <div class="asset-picker-actions">
+              <button
+                id="platoImagenGaleriaBtn"
+                type="button"
+                class="secondaryBtn"
+                data-asset-picker-open="platoImagen"
+              >
+                Galeria de imagenes
+              </button>
+            </div>
+          </div>
+
+          <div id="platoImagenPreview" class="image-preview" style="display: none"></div>
+
+          <div class="alergenos-section">
+            <label>Alergenos</label>
+            <div class="alergenos-grid" id="alergenosGrid"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="guardarPlatoBtn" type="button">Guardar plato</button>
+          <button class="cancel" id="cancelPlatoBtn" type="button" style="display: none">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog-right">
+      <div class="form-box">
+        <div class="form-header">
+          <div>
+            <h3>Platos registrados</h3>
+            <p class="form-subtitle">Busca y filtra por categoria en tiempo real.</p>
+          </div>
+        </div>
+
+        <div class="platos-toolbar">
+          <label>
+            Categoria
+            <select id="platosCategoriaFilter"></select>
+          </label>
+          <label>
+            Buscar plato
+            <input id="platosSearch" type="search" placeholder="Nombre o descripcion" />
+          </label>
+        </div>
+
+        <div id="platosContainer"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="platoEditorModal" class="imodal" aria-hidden="true">
+    <button class="imodal-backdrop" data-plato-editor-close type="button" aria-label="Cerrar"></button>
+    <div class="imodal-card dish-editor-card">
+      <div class="imodal-header">
+        <h3>Editar plato</h3>
+        <button
+          class="secondaryBtn imodal-close"
+          data-plato-editor-close
+          type="button"
+          aria-label="Cerrar"
+        >
+          X
+        </button>
+      </div>
+      <div id="platoEditorModalMount" class="dish-editor-modal-mount"></div>
+    </div>
+  </div>
+</div>
