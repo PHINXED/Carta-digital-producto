@@ -380,6 +380,8 @@ function renderStars(container, value) {
 }
 
 function openGenericSheet(sheetEl) {
+  const body = sheetEl?.querySelector?.(".sheetBody");
+  if (body) body.scrollTop = 0;
   sheetEl.classList.add("is-open");
   sheetEl.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -936,6 +938,8 @@ window.addEventListener("popstate", handleBackNavigation);
 function openSheet(plato) {
   pushHistoryState({ modal: "dish" });
   dishSheetDrag?.reset();
+  const body = dishSheet?.querySelector?.(".sheetBody");
+  if (body) body.scrollTop = 0;
   const imgInfo = getDishImageInfo(plato);
   if (imgInfo.preferred) {
     sheetImageWrap.style.display = "";
@@ -988,6 +992,64 @@ function openSheet(plato) {
   document.body.style.overflow = "hidden";
 }
 
+function getNormalizedDishAllergens(plato) {
+  return Array.from(
+    new Set(
+      (Array.isArray(plato?.alergenos) ? plato.alergenos : [])
+        .map((item) => normalizeAllergenKey(item))
+        .filter(Boolean),
+    ),
+  );
+}
+
+function renderMenuDishAllergens(plato) {
+  const allergens = getNormalizedDishAllergens(plato);
+  if (!allergens.length) return "";
+
+  const icons = allergens
+    .slice(0, 4)
+    .map((key) => {
+      const src = allergenKeyToUrl(key);
+      const title = key.replace(/_/g, " ");
+      if (!src) return "";
+      return `
+        <button
+          type="button"
+          class="menuSheetAllergenBtn"
+          data-allergen-src="${escapeHtml(src)}"
+          data-allergen-title="${escapeHtml(title)}"
+          aria-label="${escapeHtml(title)}"
+          title="${escapeHtml(title)}"
+        >
+          <img
+            class="menuSheetAllergenIcon"
+            src="${escapeHtml(src)}"
+            alt="${escapeHtml(title)}"
+            loading="lazy"
+          />
+        </button>
+      `;
+    })
+    .join("");
+
+  const extraCount =
+    allergens.length > 4
+      ? `<span class="menuSheetAllergenMore">+${allergens.length - 4}</span>`
+      : "";
+
+  return `
+    <div class="menuSheetDishExtras">
+      <div class="menuSheetDishAllergens">
+        ${icons}
+        ${extraCount}
+      </div>
+      <div class="menuSheetDishAllergenCount">
+        ${allergens.length} ${t(allergens.length === 1 ? "allergen" : "allergens")}
+      </div>
+    </div>
+  `;
+}
+
 function openMenuSheet(menu) {
   if (!menuSheet) return;
   pushHistoryState({ modal: "menu" });
@@ -1031,6 +1093,7 @@ function openMenuSheet(menu) {
             .map((entry) => {
               const dish = PLATOS.find((item) => idsEqual(item?.id, entry?.plato_id));
               const price = entry?.precio_override ?? dish?.precio;
+              const dishAllergens = renderMenuDishAllergens(dish);
               return `
                 <div class="menuSheetDishRow">
                   <div class="menuSheetDishMain">
@@ -1040,6 +1103,7 @@ function openMenuSheet(menu) {
                     <div class="menuSheetDishDesc">${escapeHtml(
                       safeText(dish?.descripcion || ""),
                     )}</div>
+                    ${dishAllergens}
                   </div>
                   <div class="menuSheetDishPrice">${formatPrice(price)}</div>
                 </div>
@@ -2171,8 +2235,19 @@ dishSheet.addEventListener("click", (e) => {
 });
 
 menuSheet?.addEventListener("click", (e) => {
-  const t = e.target;
-  if (t?.dataset?.close === "true") closeGenericSheet(menuSheet);
+  const closeTrigger = e.target?.closest?.("[data-close='true']");
+  if (closeTrigger) {
+    closeGenericSheet(menuSheet);
+    return;
+  }
+
+  const allergenTrigger = e.target?.closest?.("[data-allergen-src]");
+  if (allergenTrigger?.dataset?.allergenSrc) {
+    openAllergenZoom(
+      allergenTrigger.dataset.allergenSrc,
+      allergenTrigger.dataset.allergenTitle || t("allergen"),
+    );
+  }
 });
 
 

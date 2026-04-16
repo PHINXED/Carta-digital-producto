@@ -20,6 +20,14 @@ set
   )
 where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91';
 
+do $$
+begin
+  if to_regclass('"CartaDigitalLM"."Menus"') is not null then
+    delete from "CartaDigitalLM"."Menus"
+    where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91';
+  end if;
+end $$;
+
 -- Reemplaza la carta actual de este usuario por la plantilla demo.
 delete from "CartaDigitalLM"."Menu"
 where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91';
@@ -41,7 +49,8 @@ values
   ('Arroces y mar', '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91', true, 4),
   ('Postres', '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91', true, 5),
   ('Cafe y brunch', '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91', true, 6),
-  ('Cervezas y vermut', '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91', true, 7);
+  ('Cervezas y vermut', '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91', true, 7),
+  ('Cocina del dia', '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91', true, 8);
 
 insert into "CartaDigitalLM"."Menu" (
   plato,
@@ -503,6 +512,140 @@ values
     4
   );
 
+insert into "CartaDigitalLM"."Menu" (
+  plato,
+  descripcion,
+  precio,
+  categoria_id,
+  subcategoria,
+  imagen_url,
+  user_id,
+  activo,
+  orden
+)
+values
+  (
+    'Crema de calabaza thai',
+    'Crema suave con leche de coco, semillas tostadas y aceite especiado.',
+    8.90,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Primer plato',
+    'demo/bar-tropical/bowls.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    0
+  ),
+  (
+    'Ensaladilla del puerto',
+    'Patata cremosa, atun, piparra, ventresca y mayonesa casera.',
+    9.20,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Primer plato',
+    'demo/bar-tropical/tapas.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    1
+  ),
+  (
+    'Ravioli de boletus trufados',
+    'Pasta fresca rellena con crema de setas, mantequilla noisette y parmesano.',
+    12.90,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Primer plato',
+    'demo/bar-tropical/arroces.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    2
+  ),
+  (
+    'Lasaña melosa de carrillera',
+    'Capas finas de pasta, carrillera guisada y bechamel tostada.',
+    14.50,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Segundo plato',
+    'demo/bar-tropical/burgers.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    3
+  ),
+  (
+    'Bacalao gratinado con alioli suave',
+    'Lomo jugoso con patata panadera y gratinado ligero al horno.',
+    16.80,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Segundo plato',
+    'demo/bar-tropical/arroces.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    4
+  ),
+  (
+    'Pollo rustido con patatas panadera',
+    'Muslo deshuesado, jugo reducido y romero fresco.',
+    14.20,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Segundo plato',
+    'demo/bar-tropical/burgers.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    5
+  ),
+  (
+    'Arroz caldoso marinero',
+    'Fondo intenso con gamba, mejillon, calamar y toque de azafran.',
+    17.40,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Segundo plato',
+    'demo/bar-tropical/arroces.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    6
+  ),
+  (
+    'Tarta fina de manzana',
+    'Laminas crujientes, compota especiada y helado de vainilla.',
+    6.20,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Postre',
+    'demo/bar-tropical/postres.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    7
+  ),
+  (
+    'Flan cremoso de coco',
+    'Flan suave con coco tostado, caramelo ligero y lima fresca.',
+    5.90,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Postre',
+    'demo/bar-tropical/postres.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    8
+  ),
+  (
+    'Copa de vino de la casa',
+    'Vino tinto joven afrutado para menu o mediodia.',
+    3.90,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Bebida',
+    'demo/bar-tropical/cervezas.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    9
+  ),
+  (
+    'Agua mineral premium',
+    'Botella fria de agua mineral con gas o sin gas.',
+    2.20,
+    (select id from "CartaDigitalLM"."Categorias" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and nombre = 'Cocina del dia' limit 1),
+    'Bebida',
+    'demo/bar-tropical/cervezas.svg',
+    '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+    true,
+    10
+  );
+
 update "CartaDigitalLM"."Menu"
 set alergenos = array['gluten', 'lacteos']
 where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
@@ -538,4 +681,722 @@ set alergenos = array['gluten', 'frutos_secos', 'lacteos']
 where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
   and plato in ('Brownie de cacao intenso', 'Coulant tropical');
 
+update "CartaDigitalLM"."Menu"
+set alergenos = array['lacteos', 'apio']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Crema de calabaza thai';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['huevos', 'pescado', 'mostaza']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Ensaladilla del puerto';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['gluten', 'huevos', 'lacteos']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Ravioli de boletus trufados';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['gluten', 'lacteos', 'apio']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Lasaña melosa de carrillera';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['pescado', 'huevos']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Bacalao gratinado con alioli suave';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['apio']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Pollo rustido con patatas panadera';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['crustaceos', 'moluscos', 'pescado']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Arroz caldoso marinero';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['gluten', 'lacteos']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Tarta fina de manzana';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['huevos', 'lacteos']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Flan cremoso de coco';
+
+update "CartaDigitalLM"."Menu"
+set alergenos = array['sulfitos']
+where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+  and plato = 'Copa de vino de la casa';
+
+do $$
+begin
+  if to_regclass('"CartaDigitalLM"."Menus"') is null then
+    return;
+  end if;
+
+  insert into "CartaDigitalLM"."Menus" (
+    user_id,
+    nombre,
+    descripcion,
+    activo,
+    publicado,
+    auto_publicacion,
+    orden
+  )
+  values
+    (
+      '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+      'Menu mediodia tropical',
+      'Primero, segundo, postre y bebida con platos de cocina casera.',
+      true,
+      true,
+      false,
+      0
+    ),
+    (
+      '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+      'Menu arroz y mar',
+      'Selecciones con entrante, arroz o pescado, dulce y bebida.',
+      true,
+      true,
+      false,
+      1
+    ),
+    (
+      '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91',
+      'Menu brunch largo',
+      'Opciones saladas, dulces y cafe para una carta mas completa.',
+      true,
+      true,
+      false,
+      2
+    );
+
+  insert into "CartaDigitalLM"."Menus_campos" (
+    menu_id,
+    nombre,
+    descripcion,
+    activo,
+    permite_multiples,
+    orden
+  )
+  values
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu mediodia tropical'
+        limit 1
+      ),
+      'Primer plato',
+      'Elige un primer plato con opciones mas ligeras o cremosas.',
+      true,
+      true,
+      0
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu mediodia tropical'
+        limit 1
+      ),
+      'Segundo plato',
+      'Platos mas potentes para el mediodia.',
+      true,
+      true,
+      1
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu mediodia tropical'
+        limit 1
+      ),
+      'Postre',
+      'Cierre dulce incluido en el menu.',
+      true,
+      true,
+      2
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu mediodia tropical'
+        limit 1
+      ),
+      'Bebida',
+      'Bebidas sencillas para acompanar el menu.',
+      true,
+      true,
+      3
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu arroz y mar'
+        limit 1
+      ),
+      'Entrante',
+      'Apertura fresca o frita para compartir.',
+      true,
+      true,
+      0
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu arroz y mar'
+        limit 1
+      ),
+      'Principal',
+      'Arroces y mariscos con mas presencia visual.',
+      true,
+      true,
+      1
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu arroz y mar'
+        limit 1
+      ),
+      'Postre',
+      'Dulces conocidos para cerrar el menu.',
+      true,
+      true,
+      2
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu arroz y mar'
+        limit 1
+      ),
+      'Bebida',
+      'Burbuja o cerveza para completar la experiencia.',
+      true,
+      true,
+      3
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu brunch largo'
+        limit 1
+      ),
+      'Salado',
+      'Bloque principal del brunch.',
+      true,
+      true,
+      0
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu brunch largo'
+        limit 1
+      ),
+      'Dulce',
+      'Opciones de bolleria y postre.',
+      true,
+      true,
+      1
+    ),
+    (
+      (
+        select id
+        from "CartaDigitalLM"."Menus"
+        where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and nombre = 'Menu brunch largo'
+        limit 1
+      ),
+      'Cafe o bebida',
+      'Cafe caliente o versiones frias.',
+      true,
+      true,
+      2
+    );
+
+  insert into "CartaDigitalLM"."Menus_campos_platos" (
+    menu_campo_id,
+    plato_id,
+    precio_override,
+    notas,
+    activo,
+    orden
+  )
+  values
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Primer plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Crema de calabaza thai' limit 1),
+      null,
+      'Sabor suave y dos alergenos visibles.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Primer plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Ensaladilla del puerto' limit 1),
+      null,
+      'Opcion fria con tres alergenos.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Primer plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Ravioli de boletus trufados' limit 1),
+      null,
+      'Pasta fresca para reforzar el bloque de primero.',
+      true,
+      2
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Segundo plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Lasaña melosa de carrillera' limit 1),
+      null,
+      'Plato contundente con tres alergenos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Segundo plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Bacalao gratinado con alioli suave' limit 1),
+      null,
+      'Opcion de pescado gratinado.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Segundo plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Pollo rustido con patatas panadera' limit 1),
+      null,
+      'Segundo mas clasico de cocina del dia.',
+      true,
+      2
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Segundo plato'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Arroz caldoso marinero' limit 1),
+      null,
+      'Opcion con tres alergenos de mar.',
+      true,
+      3
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Postre'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Tarta fina de manzana' limit 1),
+      null,
+      'Postre crujiente y ligero.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Postre'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Flan cremoso de coco' limit 1),
+      null,
+      'Postre suave con dos alergenos.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Copa de vino de la casa' limit 1),
+      null,
+      'Copa de vino con sulfitos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu mediodia tropical'
+          and mc.nombre = 'Bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Agua mineral premium' limit 1),
+      null,
+      'Sin alergenos.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Entrante'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Calamar a la andaluza' limit 1),
+      null,
+      'Entrante crujiente con moluscos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Entrante'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Tartar fresco de atun' limit 1),
+      null,
+      'Version fresca con pescado y sesamo.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Principal'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Arroz meloso de gamba' limit 1),
+      null,
+      'Arroz intenso con crustaceos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Principal'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Paella del puerto' limit 1),
+      null,
+      'Arroz seco para compartir.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Principal'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Salmon a la brasa' limit 1),
+      null,
+      'Principal de brasa con pescado.',
+      true,
+      2
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Postre'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Tarta de queso tostada' limit 1),
+      null,
+      'Clasico cremoso con lacteos y huevos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Postre'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Lemon pie fresh' limit 1),
+      null,
+      'Version citrica y ligera.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Copa de cava brut' limit 1),
+      null,
+      'Burbuja fina para el maridaje.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu arroz y mar'
+          and mc.nombre = 'Bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Cana dorada' limit 1),
+      null,
+      'Tirador fresco para menu informal.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Salado'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Brunch benedict' limit 1),
+      null,
+      'Huevos, salsa y pan para brunch clasico.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Salado'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Tostada de aguacate' limit 1),
+      null,
+      'Opcion mas fresca y vegetal.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Salado'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Bao de pollo crispy' limit 1),
+      null,
+      'Pieza potente con gluten y lacteos.',
+      true,
+      2
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Dulce'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Croissant relleno de pistacho' limit 1),
+      null,
+      'Bakery con gluten, lacteos y frutos secos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Dulce'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Brownie de cacao intenso' limit 1),
+      null,
+      'Dulce con tres alergenos.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Cafe o bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Flat white' limit 1),
+      null,
+      'Cafe con lacteos y huevos.',
+      true,
+      0
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Cafe o bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Iced latte vainilla' limit 1),
+      null,
+      'Version fria con lacteos y huevos.',
+      true,
+      1
+    ),
+    (
+      (
+        select mc.id
+        from "CartaDigitalLM"."Menus_campos" mc
+        join "CartaDigitalLM"."Menus" m on m.id = mc.menu_id
+        where m.user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91'
+          and m.nombre = 'Menu brunch largo'
+          and mc.nombre = 'Cafe o bebida'
+        limit 1
+      ),
+      (select id from "CartaDigitalLM"."Menu" where user_id = '88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91' and plato = 'Agua mineral premium' limit 1),
+      null,
+      'Alternativa sin alergenos.',
+      true,
+      2
+    );
+end $$;
+
 commit;
+
