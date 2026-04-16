@@ -238,6 +238,7 @@ button:active,
   border-radius:20px;
   padding:14px 14px;
   text-align:left;
+  color:var(--text);
   box-shadow:
     0 0 0 calc(var(--frame-ring-width) * .5) var(--frame-ring),
     0 8px 22px rgba(0,0,0,.08);
@@ -301,6 +302,7 @@ button:active,
   padding:12px 12px;
   display:flex; align-items:center; gap:10px;
   text-align:left;
+  color:var(--text);
 }
 .rowIcon{
   width:26px;
@@ -327,6 +329,7 @@ button:active,
   font-weight:800;
   font-size:15.5px;
   letter-spacing:-.005em;
+  color:var(--text);
 }
 
 /* CATEGORY VIEW */
@@ -387,6 +390,7 @@ button:active,
   font-weight:700;
   font-size:13px;
   white-space:nowrap;
+  color:var(--text);
   transition:background .15s ease, color .15s ease, box-shadow .15s ease;
 }
 .chip.is-active{
@@ -786,6 +790,36 @@ button:active,
   border-bottom:1px solid var(--line);
   background:
     linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,250,252,.92)),
+    var(--surface);
+}
+
+:root[data-menu-theme="dark"] .homeMenuCard {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.01)),
+    var(--surface);
+  box-shadow:
+    0 0 0 calc(var(--frame-ring-width) * .5) var(--frame-ring),
+    0 10px 24px rgba(0,0,0,.3);
+}
+
+:root[data-menu-theme="dark"] .homeMenuMetaPill {
+  background: rgba(255,255,255,.06);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+:root[data-menu-theme="dark"] .menuSheetField {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.01)),
+    var(--surface);
+  box-shadow:
+    0 0 0 calc(var(--frame-ring-width) * .5) var(--frame-ring),
+    0 12px 28px rgba(0,0,0,.34);
+}
+
+:root[data-menu-theme="dark"] .menuSheetFieldHead {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)),
     var(--surface);
 }
 
