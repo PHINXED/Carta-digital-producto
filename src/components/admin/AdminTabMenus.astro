@@ -1,17 +1,206 @@
 <div id="tab-menus" class="tab-content">
   <section class="admin-page">
-    <div class="content-card content-card--placeholder">
+    <div class="content-card list-panel">
       <div class="panel-heading panel-heading--stack">
         <div>
           <h2>Menus</h2>
-          <p>Base visual preparada para replicar la cuarta pestana del CRM.</p>
+          <p>
+            Crea menus compuestos para destacarlos arriba de la carta y agrupar
+            platos por bloques.
+          </p>
         </div>
+        <button type="button" class="secondaryBtn" id="openMenuEditorBtn">
+          Nuevo menu
+        </button>
       </div>
 
-      <div class="empty-state empty-state--panel">
-        En este repo la tabla `Menu` se usa ahora mismo como catalogo de platos,
-        asi que dejo esta pestana lista para completar en la siguiente iteracion.
+      <div id="menusCompuestosContainer" class="menus-compuestos-list">
+        <div class="empty-state empty-state--panel">
+          Cargando menus compuestos...
+        </div>
       </div>
     </div>
   </section>
+
+  <div id="menuEditorModal" class="imodal" aria-hidden="true">
+    <button
+      type="button"
+      class="imodal-backdrop"
+      data-menu-editor-close
+      aria-label="Cerrar"
+    ></button>
+    <div
+      class="imodal-card imodal-card--gallery imodal-card--menu-editor"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Editor de menu"
+    >
+      <div class="imodal-header">
+        <h3 id="menuEditorTitle" style="margin: 0">Nuevo menu</h3>
+        <button
+          type="button"
+          class="imodal-close"
+          data-menu-editor-close
+          aria-label="Cerrar"
+        >
+          X
+        </button>
+      </div>
+
+      <input id="menuEditorId" type="hidden" />
+
+      <div class="menu-editor-layout">
+        <div class="grid-2">
+          <label class="field">
+            <span>Nombre del menu</span>
+            <input
+              id="menuEditorNombre"
+              placeholder="Ej: Menu mediodia"
+              maxlength="120"
+            />
+          </label>
+
+          <label class="field">
+            <span>Descripcion</span>
+            <input
+              id="menuEditorDescripcion"
+              placeholder="Ej: Entrante, principal y bebida"
+              maxlength="180"
+            />
+          </label>
+        </div>
+
+        <div class="menu-editor-topbar">
+          <label class="menu-check">
+            <input id="menuEditorActivo" type="checkbox" checked />
+            <span>Activo en la carta</span>
+          </label>
+        </div>
+
+        <div class="menu-editor-weekdays">
+          <div class="menu-editor-label">Dias visibles</div>
+          <div id="menuEditorWeekdays" class="menu-weekday-grid">
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="1" />
+              <span>L</span>
+            </label>
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="2" />
+              <span>M</span>
+            </label>
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="3" />
+              <span>X</span>
+            </label>
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="4" />
+              <span>J</span>
+            </label>
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="5" />
+              <span>V</span>
+            </label>
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="6" />
+              <span>S</span>
+            </label>
+            <label class="menu-weekday-option">
+              <input type="checkbox" value="0" />
+              <span>D</span>
+            </label>
+          </div>
+          <p class="hint" style="margin: 0">
+            Si no marcas ningun dia, el menu se mostrara siempre.
+          </p>
+        </div>
+
+        <div class="menu-editor-section">
+          <div class="menu-editor-section-head">
+            <div>
+              <h4>Campos del menu</h4>
+              <p>
+                Cada campo representa un bloque del menu, por ejemplo entrante
+                o principal.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="secondaryBtn"
+              id="menuEditorAddCampoBtn"
+            >
+              + Campo
+            </button>
+          </div>
+
+          <div id="menuEditorCamposContainer" class="menu-editor-fields"></div>
+        </div>
+      </div>
+
+      <div class="menu-editor-actions">
+        <button
+          type="button"
+          class="cancel"
+          id="menuEditorDeleteBtn"
+          style="display: none"
+        >
+          Eliminar menu
+        </button>
+        <button type="button" class="secondaryBtn" data-menu-editor-close>
+          Cerrar
+        </button>
+        <button type="button" id="menuEditorSaveBtn">Guardar menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="menuDishPickerModal" class="imodal" aria-hidden="true">
+    <button
+      type="button"
+      class="imodal-backdrop"
+      data-menu-dish-picker-close
+      aria-label="Cerrar"
+    ></button>
+    <div
+      class="imodal-card imodal-card--gallery imodal-card--menu-picker"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Selector de platos"
+    >
+      <div class="imodal-header">
+        <h3 id="menuDishPickerTitle" style="margin: 0">Seleccionar platos</h3>
+        <button
+          type="button"
+          class="imodal-close"
+          data-menu-dish-picker-close
+          aria-label="Cerrar"
+        >
+          X
+        </button>
+      </div>
+
+      <div class="platos-toolbar menu-picker-toolbar">
+        <label class="toolbar-field">
+          <span>Categoria</span>
+          <select id="menuDishPickerCategoria"></select>
+        </label>
+
+        <label class="toolbar-field toolbar-field--grow">
+          <span>Subcategoria</span>
+          <select id="menuDishPickerSubcategoria"></select>
+        </label>
+      </div>
+
+      <div id="menuDishPickerList" class="menu-dish-picker-list"></div>
+
+      <div class="menu-editor-actions">
+        <button
+          type="button"
+          class="secondaryBtn"
+          id="menuDishPickerDoneBtn"
+        >
+          Listo
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

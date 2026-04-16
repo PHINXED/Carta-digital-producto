@@ -79,12 +79,30 @@ const ALERGENOS = [
   "altramuces",
   "moluscos",
 ];
+const MENU_WEEKDAY_OPTIONS = [
+  { value: 0, label: "Domingo" },
+  { value: 1, label: "Lunes" },
+  { value: 2, label: "Martes" },
+  { value: 3, label: "Miercoles" },
+  { value: 4, label: "Jueves" },
+  { value: 5, label: "Viernes" },
+  { value: 6, label: "Sabado" },
+];
 
 let alergenosSeleccionados = [];
 
 // Cache para UI (filtro/buscador/badges)
 let ALL_CATEGORIAS = [];
 let ALL_PLATOS = [];
+let ALL_MENUS_COMPUESTOS = [];
+let ALL_MENUS_PROGRAMACION = [];
+let ALL_MENUS_CAMPOS = [];
+let ALL_MENUS_CAMPOS_PLATOS = [];
+let menuEditorState = null;
+let menuEditorFieldSeq = 0;
+let menuDishPickerState = null;
+let menusFeatureAvailable = true;
+let menusFeatureUnavailableReason = "";
 
 // Sortable instances (para destruir/recrear al re-render)
 let sortableCategorias = null;
@@ -204,6 +222,31 @@ const profileImageGalleryRefresh = document.getElementById(
 );
 const profileImageGalleryGrid = document.getElementById("profileImageGalleryGrid");
 const profileImageGalleryTitle = document.getElementById("profileImageGalleryTitle");
+const openMenuEditorBtn = document.getElementById("openMenuEditorBtn");
+const menusCompuestosContainer = document.getElementById(
+  "menusCompuestosContainer",
+);
+const menuEditorModal = document.getElementById("menuEditorModal");
+const menuEditorTitle = document.getElementById("menuEditorTitle");
+const menuEditorId = document.getElementById("menuEditorId");
+const menuEditorNombre = document.getElementById("menuEditorNombre");
+const menuEditorDescripcion = document.getElementById("menuEditorDescripcion");
+const menuEditorActivo = document.getElementById("menuEditorActivo");
+const menuEditorWeekdays = document.getElementById("menuEditorWeekdays");
+const menuEditorCamposContainer = document.getElementById(
+  "menuEditorCamposContainer",
+);
+const menuEditorAddCampoBtn = document.getElementById("menuEditorAddCampoBtn");
+const menuEditorDeleteBtn = document.getElementById("menuEditorDeleteBtn");
+const menuEditorSaveBtn = document.getElementById("menuEditorSaveBtn");
+const menuDishPickerModal = document.getElementById("menuDishPickerModal");
+const menuDishPickerTitle = document.getElementById("menuDishPickerTitle");
+const menuDishPickerCategoria = document.getElementById("menuDishPickerCategoria");
+const menuDishPickerSubcategoria = document.getElementById(
+  "menuDishPickerSubcategoria",
+);
+const menuDishPickerList = document.getElementById("menuDishPickerList");
+const menuDishPickerDoneBtn = document.getElementById("menuDishPickerDoneBtn");
 
 // PLATOS (toolbar)
 const platosCategoriaFilter = document.getElementById("platosCategoriaFilter");
@@ -234,12 +277,43 @@ function safeText(v) {
   return (v ?? "").toString();
 }
 
+function escapeHtml(value) {
+  return safeText(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function idsEqual(a, b) {
+  return safeText(a).trim() === safeText(b).trim();
+}
+
 function pickFirst(obj, keys) {
   for (const key of keys) {
     const value = obj?.[key];
     if (value != null && value !== "") return value;
   }
   return null;
+}
+
+function toNullableInputValue(value) {
+  const text = safeText(value).trim();
+  return text || null;
+}
+
+function normalizeWeekday(value) {
+  const weekday = Number(value);
+  if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) return null;
+  return weekday;
+}
+
+function getMenuWeekdayLabel(value) {
+  const weekday = normalizeWeekday(value);
+  if (weekday == null) return "";
+  const item = MENU_WEEKDAY_OPTIONS.find((entry) => entry.value === weekday);
+  return item?.label || "";
 }
 
 function parseCategoryIds(rawValue) {
@@ -463,7 +537,9 @@ function syncModalBodyLock() {
   const hasOpenModal =
     placeIdModal?.getAttribute("aria-hidden") === "false" ||
     platoImagenGalleryModal?.getAttribute("aria-hidden") === "false" ||
-    profileImageGalleryModal?.getAttribute("aria-hidden") === "false";
+    profileImageGalleryModal?.getAttribute("aria-hidden") === "false" ||
+    menuEditorModal?.getAttribute("aria-hidden") === "false" ||
+    menuDishPickerModal?.getAttribute("aria-hidden") === "false";
   document.body.style.overflow = hasOpenModal ? "hidden" : "";
 }
 

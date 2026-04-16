@@ -32,6 +32,38 @@
   </div>
 </div>
 
+<!-- MODAL MENU (bottom sheet) -->
+<div class="sheet" id="menuSheet" aria-hidden="true">
+  <button
+    class="sheetBackdrop"
+    type="button"
+    data-close="true"
+    aria-label="Cerrar"
+    data-i18n="close"
+    data-i18n-attr="aria-label"
+  ></button>
+  <div
+    class="sheetCard"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menu"
+  >
+    <div class="sheetHandle" aria-hidden="true"></div>
+    <div class="sheetBody">
+      <div class="sheetHeader sheetHeader--menu">
+        <div class="sheetHeaderEyebrow" data-i18n="menus_section">
+          Menus destacados
+        </div>
+        <div class="sheetHeaderTitle" id="menuSheetTitle">Menu</div>
+        <div class="sheetHeaderSub" id="menuSheetDesc" style="display: none"></div>
+      </div>
+
+      <div class="menuSheetMeta" id="menuSheetMeta"></div>
+      <div class="menuSheetFields" id="menuSheetFields"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VALORACIONES (bottom sheet) -->
 <div class="sheet" id="ratingsSheet" aria-hidden="true">
   <button
