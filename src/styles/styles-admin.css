@@ -39,10 +39,7 @@ html {
 body {
     font-family: var(--font-ui);
     line-height: 1.4;
-    background:
-        radial-gradient(1200px 600px at 15% -15%, var(--accent-glow-1), transparent 60%),
-        radial-gradient(900px 500px at 85% -25%, var(--accent-glow-2), transparent 60%),
-        var(--bg);
+    background: var(--bg);
     color: var(--text);
     padding: 20px;
 }
