@@ -1698,7 +1698,7 @@ h1 svg {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0;
 }
 
 .admin-shell::before {
@@ -1715,6 +1715,11 @@ h1 svg {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    border: 1px solid var(--border);
+    border-top: 0;
+    border-radius: 0 0 18px 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0) 45%);
+    padding: 14px;
 }
 
 .admin-tab-stack::before {
@@ -1728,12 +1733,12 @@ h1 svg {
 
 .admin-tabs {
     gap: 14px;
-    padding: 0 0 12px;
+    padding: 12px 14px 10px;
     margin-bottom: 0;
-    background: linear-gradient(180deg, var(--accent-soft-alt), rgba(0, 0, 0, 0) 78%);
-    border: 0;
+    background: linear-gradient(180deg, var(--accent-soft-alt), rgba(0, 0, 0, 0) 78%), #101317;
+    border: 1px solid var(--border);
     border-bottom: 0;
-    border-radius: 0;
+    border-radius: 18px 18px 0 0;
     overflow-x: auto;
 }
 
@@ -2972,6 +2977,7 @@ h1 svg {
 .admin-panel-footer {
     display: flex;
     justify-content: flex-end;
+    margin-top: 16px;
 }
 
 #logoutBtn {
