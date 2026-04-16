@@ -151,6 +151,15 @@ const PROFILE_LOGO_KEYS = [
   "logo",
   "emblema",
 ];
+const PROFILE_MENU_METADATA_KEYS = ["personalizacion_menu"];
+const MENU_LOGO_BACKGROUND_KEYS = ["logo_background", "logo_bg", "fondo_logo"];
+const LOGO_BACKGROUND_MODE_SOLID = "solid";
+const LOGO_BACKGROUND_MODE_TRANSPARENT = "transparent";
+const DEFAULT_LOGO_BACKGROUND_SETTINGS = Object.freeze({
+  mode: LOGO_BACKGROUND_MODE_SOLID,
+  color: "#FFFFFF",
+  opacity: 82,
+});
 const DISH_IMAGE_KEYS = ["imagen_url", "image_url", "foto_url", "img_url"];
 const DISH_MULTI_CATEGORY_KEYS = [
   "categorias_ids",
@@ -532,6 +541,83 @@ function pick(obj, keys) {
   return null;
 }
 
+function parseJsonObjectValue(value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {}
+  }
+  return null;
+}
+
+function getProfileMenuMetadata(profileData) {
+  const metadata = parseJsonObjectValue(
+    pick(profileData, PROFILE_MENU_METADATA_KEYS),
+  );
+  return metadata && typeof metadata === "object" ? metadata : {};
+}
+
+function normalizeLogoBackgroundMode(value) {
+  const normalized = safeText(value).trim().toLowerCase();
+  return normalized === LOGO_BACKGROUND_MODE_TRANSPARENT
+    ? LOGO_BACKGROUND_MODE_TRANSPARENT
+    : LOGO_BACKGROUND_MODE_SOLID;
+}
+
+function normalizeLogoBackgroundOpacity(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return DEFAULT_LOGO_BACKGROUND_SETTINGS.opacity;
+  return Math.min(100, Math.max(0, Math.round(numeric)));
+}
+
+function normalizeLogoBackgroundColor(value) {
+  return (
+    normalizeHexColor(value) ||
+    normalizeHexColor(DEFAULT_LOGO_BACKGROUND_SETTINGS.color) ||
+    "#FFFFFF"
+  );
+}
+
+function normalizeLogoBackgroundSettings(rawValue) {
+  let source = rawValue;
+  const rawText = safeText(rawValue).trim();
+  if (typeof rawValue === "string" && rawText) {
+    const low = rawText.toLowerCase();
+    if (low === LOGO_BACKGROUND_MODE_SOLID || low === LOGO_BACKGROUND_MODE_TRANSPARENT) {
+      source = { mode: low };
+    } else {
+      source = parseJsonObjectValue(rawValue);
+    }
+  }
+
+  const parsed =
+    source && typeof source === "object" && !Array.isArray(source) ? source : {};
+
+  return {
+    mode: normalizeLogoBackgroundMode(
+      parsed.mode ?? parsed.tipo ?? parsed.style ?? parsed.variant,
+    ),
+    color: normalizeLogoBackgroundColor(
+      parsed.color ?? parsed.hex ?? parsed.background ?? parsed.bg,
+    ),
+    opacity: normalizeLogoBackgroundOpacity(
+      parsed.opacity ?? parsed.alpha ?? parsed.opacidad,
+    ),
+  };
+}
+
+function getProfileLogoBackgroundSettings(profileData) {
+  const metadata = getProfileMenuMetadata(profileData);
+  const rawSettings = pick(metadata, MENU_LOGO_BACKGROUND_KEYS);
+  return normalizeLogoBackgroundSettings(rawSettings);
+}
+
 function getProfileDishPlaceholderUrl() {
   return normalizeOptionalUrl(pick(PROFILE, PROFILE_DISH_PLACEHOLDER_KEYS));
 }
@@ -719,6 +805,16 @@ function applyPublicTheme(primaryColor) {
   for (const [key, value] of Object.entries(theme)) {
     root.style.setProperty(key, value);
   }
+}
+
+function applyCoverLogoBackground(settings) {
+  if (!coverLogoWrap) return;
+  const normalized = normalizeLogoBackgroundSettings(settings);
+  const bg =
+    normalized.mode === LOGO_BACKGROUND_MODE_TRANSPARENT
+      ? "transparent"
+      : toRgba(normalized.color, normalized.opacity / 100);
+  coverLogoWrap.style.setProperty("--cover-logo-bg", bg);
 }
 
 function t(key, vars) {
@@ -1861,6 +1957,7 @@ async function loadMenusIfExists() {
 function applyProfileToHome() {
   if (!PROFILE) {
     applyPublicTheme(DEFAULT_PRIMARY_COLOR);
+    applyCoverLogoBackground(DEFAULT_LOGO_BACKGROUND_SETTINGS);
     // Fallback: si no hay portada, ponemos un degradado para no quedar feo
     coverImg.style.display = "none";
     cover.style.background = "var(--cover-gradient)";
@@ -1872,6 +1969,7 @@ function applyProfileToHome() {
   applyPublicTheme(
     pick(PROFILE, PROFILE_PRIMARY_COLOR_KEYS) || DEFAULT_PRIMARY_COLOR,
   );
+  applyCoverLogoBackground(getProfileLogoBackgroundSettings(PROFILE));
 
   const name = pick(PROFILE, [
     "nombre",

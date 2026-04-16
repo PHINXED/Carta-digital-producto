@@ -839,6 +839,13 @@ h1 svg {
     color: var(--text);
 }
 
+.form-box input[type="range"] {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
 #platoCategoria,
 #platoSubcategoria {
     min-height: 46px;
@@ -1985,7 +1992,7 @@ h1 svg {
 
 .appearance-grid {
     display: grid;
-    grid-template-columns: minmax(260px, 360px);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 360px));
     gap: 16px;
     align-items: start;
     justify-content: start;
@@ -1996,6 +2003,61 @@ h1 svg {
     border-radius: 14px;
     padding: 12px;
     background: rgba(255, 255, 255, 0.02);
+}
+
+.logo-bg-controls {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logo-bg-controls.is-disabled {
+    opacity: 0.5;
+}
+
+.logo-bg-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.logo-bg-row label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.logo-bg-row #perfilLogoBgColor {
+    width: 56px;
+    min-width: 56px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.logo-bg-row--range {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.logo-bg-row--range label {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#perfilLogoBgOpacity {
+    width: 100%;
+    accent-color: var(--accent-ui);
+}
+
+#perfilLogoBgOpacity:focus {
+    box-shadow: none;
 }
 
 .profile-actions {

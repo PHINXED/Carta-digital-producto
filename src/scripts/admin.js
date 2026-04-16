@@ -32,6 +32,14 @@ const PROFILE_LOGO_KEYS = [
   "emblema",
 ];
 const PROFILE_MENU_METADATA_KEYS = ["personalizacion_menu"];
+const MENU_LOGO_BACKGROUND_KEYS = ["logo_background", "logo_bg", "fondo_logo"];
+const LOGO_BACKGROUND_MODE_SOLID = "solid";
+const LOGO_BACKGROUND_MODE_TRANSPARENT = "transparent";
+const DEFAULT_LOGO_BACKGROUND_SETTINGS = Object.freeze({
+  mode: LOGO_BACKGROUND_MODE_SOLID,
+  color: "#FFFFFF",
+  opacity: 82,
+});
 const MENU_SUBCATEGORIA_BY_CATEGORY_KEYS = [
   "subcategorias_por_categoria",
   "subcategorias_by_category",
@@ -176,6 +184,13 @@ const perfilColorPrincipal = document.getElementById("perfilColorPrincipal");
 const perfilColorPrincipalLabel = document.getElementById(
   "perfilColorPrincipalLabel",
 );
+const perfilLogoBgMode = document.getElementById("perfilLogoBgMode");
+const perfilLogoBgColor = document.getElementById("perfilLogoBgColor");
+const perfilLogoBgOpacity = document.getElementById("perfilLogoBgOpacity");
+const perfilLogoBgOpacityLabel = document.getElementById(
+  "perfilLogoBgOpacityLabel",
+);
+const perfilLogoBgControls = document.getElementById("perfilLogoBgControls");
 const colorSwatches = Array.from(
   document.querySelectorAll(".color-swatch[data-color]"),
 );
@@ -426,6 +441,91 @@ function extractSubcategoriasByCategoria(profileData) {
   const menuMetadata = getProfileMenuMetadata(profileData);
   const rawByCategory = pickFirst(menuMetadata, MENU_SUBCATEGORIA_BY_CATEGORY_KEYS);
   return normalizeSubcategoriasByCategoria(rawByCategory);
+}
+
+function normalizeLogoBackgroundMode(value) {
+  const normalized = safeText(value).trim().toLowerCase();
+  return normalized === LOGO_BACKGROUND_MODE_TRANSPARENT
+    ? LOGO_BACKGROUND_MODE_TRANSPARENT
+    : LOGO_BACKGROUND_MODE_SOLID;
+}
+
+function normalizeLogoBackgroundOpacity(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return DEFAULT_LOGO_BACKGROUND_SETTINGS.opacity;
+  return Math.min(100, Math.max(0, Math.round(numeric)));
+}
+
+function normalizeLogoBackgroundColor(value) {
+  return (
+    normalizeHexColor(value) ||
+    normalizeHexColor(DEFAULT_LOGO_BACKGROUND_SETTINGS.color) ||
+    "#FFFFFF"
+  );
+}
+
+function normalizeLogoBackgroundSettings(rawValue) {
+  let source = rawValue;
+  const rawText = safeText(rawValue).trim();
+  if (typeof rawValue === "string" && rawText) {
+    const low = rawText.toLowerCase();
+    if (low === LOGO_BACKGROUND_MODE_SOLID || low === LOGO_BACKGROUND_MODE_TRANSPARENT) {
+      source = { mode: low };
+    } else {
+      source = parseJsonObjectValue(rawValue);
+    }
+  }
+
+  const parsed =
+    source && typeof source === "object" && !Array.isArray(source) ? source : {};
+
+  return {
+    mode: normalizeLogoBackgroundMode(
+      parsed.mode ?? parsed.tipo ?? parsed.style ?? parsed.variant,
+    ),
+    color: normalizeLogoBackgroundColor(
+      parsed.color ?? parsed.hex ?? parsed.background ?? parsed.bg,
+    ),
+    opacity: normalizeLogoBackgroundOpacity(
+      parsed.opacity ?? parsed.alpha ?? parsed.opacidad,
+    ),
+  };
+}
+
+function getLogoBackgroundSettingsFromMetadata(menuMetadata) {
+  const rawSettings = pickFirst(menuMetadata, MENU_LOGO_BACKGROUND_KEYS);
+  return normalizeLogoBackgroundSettings(rawSettings);
+}
+
+function updateLogoBackgroundOpacityLabel(value) {
+  if (!perfilLogoBgOpacityLabel) return;
+  const normalized = normalizeLogoBackgroundOpacity(value);
+  perfilLogoBgOpacityLabel.textContent = `${normalized}%`;
+}
+
+function syncLogoBackgroundControlsState() {
+  const mode = normalizeLogoBackgroundMode(perfilLogoBgMode?.value);
+  const isTransparent = mode === LOGO_BACKGROUND_MODE_TRANSPARENT;
+  if (perfilLogoBgColor) perfilLogoBgColor.disabled = isTransparent;
+  if (perfilLogoBgOpacity) perfilLogoBgOpacity.disabled = isTransparent;
+  perfilLogoBgControls?.classList.toggle("is-disabled", isTransparent);
+}
+
+function applyLogoBackgroundSettingsToForm(settings) {
+  const normalized = normalizeLogoBackgroundSettings(settings);
+  if (perfilLogoBgMode) perfilLogoBgMode.value = normalized.mode;
+  if (perfilLogoBgColor) perfilLogoBgColor.value = normalized.color.toLowerCase();
+  if (perfilLogoBgOpacity) perfilLogoBgOpacity.value = String(normalized.opacity);
+  updateLogoBackgroundOpacityLabel(normalized.opacity);
+  syncLogoBackgroundControlsState();
+}
+
+function getLogoBackgroundSettingsFromForm() {
+  return normalizeLogoBackgroundSettings({
+    mode: perfilLogoBgMode?.value,
+    color: perfilLogoBgColor?.value,
+    opacity: perfilLogoBgOpacity?.value,
+  });
 }
 
 function parseCategoryIds(rawValue) {
@@ -1396,6 +1496,22 @@ perfilColorPrincipal?.addEventListener("input", (event) => {
   applyAdminTheme(event.target?.value);
 });
 
+perfilLogoBgMode?.addEventListener("change", () => {
+  syncLogoBackgroundControlsState();
+});
+
+perfilLogoBgColor?.addEventListener("input", () => {
+  const normalized = normalizeLogoBackgroundColor(perfilLogoBgColor.value);
+  if (perfilLogoBgColor.value !== normalized.toLowerCase()) {
+    perfilLogoBgColor.value = normalized.toLowerCase();
+  }
+});
+
+perfilLogoBgOpacity?.addEventListener("input", () => {
+  updateLogoBackgroundOpacityLabel(perfilLogoBgOpacity.value);
+});
+
+applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
 applyAdminTheme(activePrimaryColor, { persist: false });
 
 // ========== LOGIN ==========
@@ -1511,9 +1627,14 @@ async function cargarPerfil() {
     } else {
       markActiveSwatches(getCurrentPrimaryColor());
     }
+
+    applyLogoBackgroundSettingsToForm(
+      getLogoBackgroundSettingsFromMetadata(profileMenuMetadataCache),
+    );
   } else {
     profileMenuMetadataCache = {};
     SUBCATEGORIAS_POR_CATEGORIA = {};
+    applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
   }
 }
 
@@ -1646,6 +1767,11 @@ document.getElementById("guardarPerfilBtn").onclick = async () => {
       platoDefaultFinal = await uploadToStorage(platoDefaultFile, "platos-default");
       setProfileMediaFromUrl("platoDefault", platoDefaultFinal);
     }
+    const logoBackgroundSettings = getLogoBackgroundSettingsFromForm();
+    const nextProfileMenuMetadata = {
+      ...profileMenuMetadataCache,
+      logo_background: logoBackgroundSettings,
+    };
 
     const payload = {
       user_id: currentUser.id,
@@ -1701,6 +1827,17 @@ document.getElementById("guardarPerfilBtn").onclick = async () => {
         msg.includes("fallback") ||
         msg.includes("default");
       return isMissingCol && mentionsBranding;
+    };
+    const isOptionalMenuMetadataColumnError = (err) => {
+      const msg = safeText(err?.message).toLowerCase();
+      const isMissingCol =
+        msg.includes("column") ||
+        msg.includes("does not exist") ||
+        msg.includes("schema cache") ||
+        msg.includes("unknown");
+      const mentionsMenuMetadata =
+        msg.includes("personalizacion_menu") || msg.includes("personalizacion");
+      return isMissingCol && mentionsMenuMetadata;
     };
 
     const buildProfileOptionalCandidates = (basePayload) => {
@@ -1807,6 +1944,23 @@ document.getElementById("guardarPerfilBtn").onclick = async () => {
       error = fallbackErr || null;
     }
     if (error) throw error;
+
+    const { error: menuMetadataErr } = await db
+      .from("Perfil")
+      .update({ personalizacion_menu: nextProfileMenuMetadata })
+      .eq("user_id", currentUser.id);
+    if (menuMetadataErr) {
+      if (isOptionalMenuMetadataColumnError(menuMetadataErr)) {
+        console.warn(
+          "Perfil sin columna personalizacion_menu. No se pudo guardar la configuracion del fondo del logo.",
+          menuMetadataErr.message,
+        );
+      } else {
+        throw menuMetadataErr;
+      }
+    } else {
+      profileMenuMetadataCache = { ...nextProfileMenuMetadata };
+    }
 
     // Si el usuario ha escrito un PIN, lo guardamos (hasheado) via RPC
     const pinRaw = (perfilWifiPin?.value || "").trim();

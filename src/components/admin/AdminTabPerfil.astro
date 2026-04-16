@@ -279,6 +279,40 @@
                 Selecciona directamente el color exacto que quieres aplicar.
               </small>
             </div>
+
+            <div class="field appearance-grid__picker">
+              <label for="perfilLogoBgMode">Fondo del logo</label>
+              <select id="perfilLogoBgMode">
+                <option value="solid">Color</option>
+                <option value="transparent">Transparente</option>
+              </select>
+
+              <div class="logo-bg-controls" id="perfilLogoBgControls">
+                <div class="logo-bg-row">
+                  <label for="perfilLogoBgColor">Color de fondo</label>
+                  <input id="perfilLogoBgColor" type="color" value="#ffffff" />
+                </div>
+
+                <div class="logo-bg-row logo-bg-row--range">
+                  <label for="perfilLogoBgOpacity">
+                    Opacidad
+                    <span id="perfilLogoBgOpacityLabel">82%</span>
+                  </label>
+                  <input
+                    id="perfilLogoBgOpacity"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value="82"
+                  />
+                </div>
+              </div>
+
+              <small class="hint">
+                Elige transparente o un color de fondo para el logo con la opacidad que quieras.
+              </small>
+            </div>
           </div>
         </div>
       </section>

@@ -34,6 +34,7 @@
   --radius:22px;
   --font-ui:"Manrope","Avenir Next","Segoe UI",sans-serif;
   --font-display:"Fraunces","Georgia",serif;
+  --cover-logo-bg:rgba(255,255,255,.82);
 }
 
 *{box-sizing:border-box}
@@ -131,7 +132,7 @@ button:active,
   aspect-ratio:1 / 1;
   border-radius:14px;
   border:var(--frame-width) solid var(--frame-border);
-  background:rgba(255,255,255,.82);
+  background:var(--cover-logo-bg);
   overflow:hidden;
   box-shadow:
     0 0 0 calc(var(--frame-ring-width) * .45) var(--frame-ring),
