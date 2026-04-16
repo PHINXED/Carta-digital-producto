@@ -44,6 +44,88 @@ body {
     padding: 20px;
 }
 
+:root[data-admin-theme="light"] {
+    --bg: #edf1f7;
+    --panel: #ffffff;
+    --panel-2: #f6f8fc;
+    --panel-3: #eef3f9;
+    --border: #d4ddeb;
+    --text: #111827;
+    --muted: #5f6f86;
+}
+
+:root[data-admin-theme="light"] .admin-container {
+    background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+    box-shadow:
+        0 16px 38px rgba(15, 23, 42, 0.14),
+        inset 0 0 0 1px rgba(17, 24, 39, 0.03);
+}
+
+:root[data-admin-theme="light"] h1,
+:root[data-admin-theme="light"] h2,
+:root[data-admin-theme="light"] h3,
+:root[data-admin-theme="light"] .panel-heading h2,
+:root[data-admin-theme="light"] .profile-media-card__header h5,
+:root[data-admin-theme="light"] .categoria-nombre,
+:root[data-admin-theme="light"] .plato-nombre,
+:root[data-admin-theme="light"] .edit-aside-name,
+:root[data-admin-theme="light"] .menu-dish-picker-name {
+    color: var(--text);
+}
+
+:root[data-admin-theme="light"] .tabs {
+    background: #e8edf6;
+    border-color: var(--border);
+}
+
+:root[data-admin-theme="light"] .tab {
+    color: #53627b;
+}
+
+:root[data-admin-theme="light"] .tab.active {
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+}
+
+:root[data-admin-theme="light"] .profile-block,
+:root[data-admin-theme="light"] .profile-media-card,
+:root[data-admin-theme="light"] .profile-business-group,
+:root[data-admin-theme="light"] .category-subeditor,
+:root[data-admin-theme="light"] .empty-state--panel,
+:root[data-admin-theme="light"] .listWrap,
+:root[data-admin-theme="light"] .topbar {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(17, 24, 39, 0.1);
+}
+
+:root[data-admin-theme="light"] .theme-preview,
+:root[data-admin-theme="light"] .image-preview--media {
+    background:
+        radial-gradient(circle at top, rgba(17, 24, 39, 0.05), transparent 45%),
+        #f7f9fc;
+}
+
+:root[data-admin-theme="light"] .form-box input[readonly] {
+    background: #f3f6fb;
+    color: #6b7280;
+    border-style: solid;
+}
+
+:root[data-admin-theme="light"] .form-box .secondaryBtn,
+:root[data-admin-theme="light"] .form-box .cancel {
+    background: #ffffff;
+}
+
+:root[data-admin-theme="light"] #login-form {
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+}
+
+:root[data-admin-theme="light"] #login-form input {
+    background: #f3f6fb;
+    border-color: var(--border);
+    color: var(--text);
+}
+
 input,
 select,
 button {

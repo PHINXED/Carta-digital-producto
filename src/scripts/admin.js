@@ -10,6 +10,10 @@ const db = supabase.schema("CartaDigitalLM");
 const STORAGE_BUCKET = "imenu";
 const DEFAULT_PRIMARY_COLOR = "#FFE800";
 const ADMIN_THEME_STORAGE_KEY = "imenu.admin.primary_color";
+const ADMIN_THEME_MODE_STORAGE_KEY = "imenu.admin.theme";
+const ADMIN_THEME_LIGHT = "light";
+const ADMIN_THEME_DARK = "dark";
+const DEFAULT_ADMIN_THEME = ADMIN_THEME_DARK;
 const PROFILE_PRIMARY_COLOR_KEYS = [
   "color_principal",
   "primary_color",
@@ -44,6 +48,11 @@ const MENU_APPEARANCE_ADMIN_COLOR_KEYS = [
   "color_admin",
   "adminColor",
 ];
+const MENU_APPEARANCE_ADMIN_THEME_KEYS = [
+  "admin_theme",
+  "theme_admin",
+  "adminTheme",
+];
 const MENU_APPEARANCE_MENU_COLOR_KEYS = [
   "menu_color",
   "color_menu",
@@ -64,6 +73,7 @@ const DEFAULT_LOGO_BACKGROUND_SETTINGS = Object.freeze({
 });
 const DEFAULT_MENU_APPEARANCE_SETTINGS = Object.freeze({
   adminColor: DEFAULT_PRIMARY_COLOR,
+  adminTheme: DEFAULT_ADMIN_THEME,
   menuColor: DEFAULT_PRIMARY_COLOR,
   menuTheme: DEFAULT_MENU_THEME,
 });
@@ -211,6 +221,7 @@ const perfilColorPrincipal = document.getElementById("perfilColorPrincipal");
 const perfilColorPrincipalLabel = document.getElementById(
   "perfilColorPrincipalLabel",
 );
+const perfilAdminTheme = document.getElementById("perfilAdminTheme");
 const perfilMenuColor = document.getElementById("perfilMenuColor");
 const perfilMenuColorLabel = document.getElementById("perfilMenuColorLabel");
 const perfilMenuTheme = document.getElementById("perfilMenuTheme");
@@ -531,6 +542,18 @@ function getLogoBackgroundSettingsFromMetadata(menuMetadata) {
   return normalizeLogoBackgroundSettings(rawSettings);
 }
 
+function normalizeAdminTheme(value) {
+  const normalized = safeText(value).trim().toLowerCase();
+  if (
+    normalized === ADMIN_THEME_LIGHT ||
+    normalized === "claro" ||
+    normalized === "lightmode"
+  ) {
+    return ADMIN_THEME_LIGHT;
+  }
+  return ADMIN_THEME_DARK;
+}
+
 function normalizeMenuTheme(value) {
   const normalized = safeText(value).trim().toLowerCase();
   if (
@@ -545,7 +568,10 @@ function normalizeMenuTheme(value) {
 
 function normalizeMenuAppearanceSettings(
   rawValue,
-  { fallbackColor = DEFAULT_PRIMARY_COLOR } = {},
+  {
+    fallbackColor = DEFAULT_PRIMARY_COLOR,
+    fallbackAdminTheme = DEFAULT_ADMIN_THEME,
+  } = {},
 ) {
   let source = rawValue;
   const rawText = safeText(rawValue).trim();
@@ -568,6 +594,9 @@ function normalizeMenuAppearanceSettings(
 
   return {
     adminColor,
+    adminTheme: normalizeAdminTheme(
+      pickFirst(parsed, MENU_APPEARANCE_ADMIN_THEME_KEYS) ?? fallbackAdminTheme,
+    ),
     menuColor,
     menuTheme: normalizeMenuTheme(pickFirst(parsed, MENU_APPEARANCE_THEME_KEYS)),
   };
@@ -575,20 +604,27 @@ function normalizeMenuAppearanceSettings(
 
 function getMenuAppearanceSettingsFromMetadata(
   menuMetadata,
-  { fallbackColor = DEFAULT_PRIMARY_COLOR } = {},
+  {
+    fallbackColor = DEFAULT_PRIMARY_COLOR,
+    fallbackAdminTheme = DEFAULT_ADMIN_THEME,
+  } = {},
 ) {
   const rawAppearance = pickFirst(menuMetadata, MENU_APPEARANCE_KEYS);
   if (rawAppearance) {
-    return normalizeMenuAppearanceSettings(rawAppearance, { fallbackColor });
+    return normalizeMenuAppearanceSettings(rawAppearance, {
+      fallbackColor,
+      fallbackAdminTheme,
+    });
   }
 
   return normalizeMenuAppearanceSettings(
     {
       admin_color: pickFirst(menuMetadata, MENU_APPEARANCE_ADMIN_COLOR_KEYS),
+      admin_theme: pickFirst(menuMetadata, MENU_APPEARANCE_ADMIN_THEME_KEYS),
       menu_color: pickFirst(menuMetadata, MENU_APPEARANCE_MENU_COLOR_KEYS),
       menu_theme: pickFirst(menuMetadata, MENU_APPEARANCE_THEME_KEYS),
     },
-    { fallbackColor },
+    { fallbackColor, fallbackAdminTheme },
   );
 }
 
@@ -596,6 +632,22 @@ function setMenuColorInForm(value) {
   const normalized = normalizeHexColor(value) || DEFAULT_PRIMARY_COLOR;
   if (perfilMenuColor) perfilMenuColor.value = normalized.toLowerCase();
   if (perfilMenuColorLabel) perfilMenuColorLabel.textContent = normalized;
+}
+
+function getCurrentAdminTheme() {
+  return normalizeAdminTheme(
+    perfilAdminTheme?.value || localStorage.getItem(ADMIN_THEME_MODE_STORAGE_KEY),
+  );
+}
+
+function applyAdminSurfaceTheme(themeMode, { persist = true } = {}) {
+  const normalized = normalizeAdminTheme(themeMode);
+  document.documentElement.setAttribute("data-admin-theme", normalized);
+  if (perfilAdminTheme) perfilAdminTheme.value = normalized;
+  if (persist) {
+    localStorage.setItem(ADMIN_THEME_MODE_STORAGE_KEY, normalized);
+  }
+  return normalized;
 }
 
 function getCurrentMenuColor() {
@@ -612,9 +664,10 @@ function getCurrentMenuTheme() {
 
 function applyMenuAppearanceSettingsToForm(
   settings,
-  { persistAdminColor = false } = {},
+  { persistAdminColor = false, persistAdminTheme = false } = {},
 ) {
   const normalized = normalizeMenuAppearanceSettings(settings);
+  applyAdminSurfaceTheme(normalized.adminTheme, { persist: persistAdminTheme });
   applyAdminTheme(normalized.adminColor, { persist: persistAdminColor });
   setMenuColorInForm(normalized.menuColor);
   if (perfilMenuTheme) perfilMenuTheme.value = normalized.menuTheme;
@@ -623,6 +676,7 @@ function applyMenuAppearanceSettingsToForm(
 function getMenuAppearanceSettingsFromForm() {
   return normalizeMenuAppearanceSettings({
     admin_color: getCurrentPrimaryColor(),
+    admin_theme: getCurrentAdminTheme(),
     menu_color: getCurrentMenuColor(),
     menu_theme: getCurrentMenuTheme(),
   });
@@ -797,17 +851,21 @@ function markActiveSwatches(colorHex) {
 
 function applyAdminTheme(color, { persist = true } = {}) {
   const normalized = normalizeHexColor(color) || DEFAULT_PRIMARY_COLOR;
-  const accentUi = ensureContrast(normalized, "#1C1C1C", 3.2);
-  const accentStrong = mixHex(normalized, "#FFFFFF", 0.16);
-  const accentUiStrong = ensureContrast(accentStrong, "#1C1C1C", 3.4);
-  const accentSoft = toRgba(accentUi, 0.16);
-  const accentSoftAlt = toRgba(accentUi, 0.1);
-  const accentShadow = toRgba(accentUi, 0.28);
-  const accentShadowStrong = toRgba(accentUi, 0.36);
-  const accentGlow1 = toRgba(accentUi, 0.2);
-  const accentGlow2 = toRgba(accentUi, 0.12);
-  const accentTintBg = toRgba(accentUi, 0.14);
-  const accentTintPanel = toRgba(accentUi, 0.2);
+  const isLight = getCurrentAdminTheme() === ADMIN_THEME_LIGHT;
+  const accentTarget = isLight ? "#FFFFFF" : "#1C1C1C";
+  const accentUi = ensureContrast(normalized, accentTarget, isLight ? 3 : 3.2);
+  const accentStrong = isLight
+    ? mixHex(normalized, "#000000", 0.12)
+    : mixHex(normalized, "#FFFFFF", 0.16);
+  const accentUiStrong = ensureContrast(accentStrong, accentTarget, isLight ? 3.2 : 3.4);
+  const accentSoft = toRgba(accentUi, isLight ? 0.2 : 0.16);
+  const accentSoftAlt = toRgba(accentUi, isLight ? 0.12 : 0.1);
+  const accentShadow = toRgba(accentUi, isLight ? 0.2 : 0.28);
+  const accentShadowStrong = toRgba(accentUi, isLight ? 0.28 : 0.36);
+  const accentGlow1 = toRgba(accentUi, isLight ? 0.14 : 0.2);
+  const accentGlow2 = toRgba(accentUi, isLight ? 0.08 : 0.12);
+  const accentTintBg = toRgba(accentUi, isLight ? 0.1 : 0.14);
+  const accentTintPanel = toRgba(accentUi, isLight ? 0.14 : 0.2);
   const accentInk = bestTextColor(normalized);
 
   const root = document.documentElement;
@@ -1627,6 +1685,12 @@ perfilColorPrincipal?.addEventListener("input", (event) => {
   applyAdminTheme(event.target?.value);
 });
 
+perfilAdminTheme?.addEventListener("change", (event) => {
+  const themeMode = normalizeAdminTheme(event.target?.value);
+  applyAdminSurfaceTheme(themeMode);
+  applyAdminTheme(getCurrentPrimaryColor(), { persist: false });
+});
+
 perfilMenuColor?.addEventListener("input", (event) => {
   setMenuColorInForm(event.target?.value);
 });
@@ -1653,8 +1717,16 @@ perfilLogoBgOpacity?.addEventListener("input", () => {
 });
 
 applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
-applyMenuAppearanceSettingsToForm(DEFAULT_MENU_APPEARANCE_SETTINGS);
-applyAdminTheme(activePrimaryColor, { persist: false });
+applyMenuAppearanceSettingsToForm(
+  {
+    ...DEFAULT_MENU_APPEARANCE_SETTINGS,
+    admin_color: activePrimaryColor,
+    admin_theme: normalizeAdminTheme(
+      localStorage.getItem(ADMIN_THEME_MODE_STORAGE_KEY),
+    ),
+  },
+  { persistAdminColor: false, persistAdminTheme: false },
+);
 
 // ========== LOGIN ==========
 document.getElementById("loginBtn").onclick = async () => {
@@ -1758,9 +1830,17 @@ async function cargarPerfil() {
     const legacyMenuColor = pickFirst(data, PROFILE_PRIMARY_COLOR_KEYS);
     const menuAppearance = getMenuAppearanceSettingsFromMetadata(
       profileMenuMetadataCache,
-      { fallbackColor: legacyMenuColor || DEFAULT_PRIMARY_COLOR },
+      {
+        fallbackColor: legacyMenuColor || DEFAULT_PRIMARY_COLOR,
+        fallbackAdminTheme: normalizeAdminTheme(
+          localStorage.getItem(ADMIN_THEME_MODE_STORAGE_KEY),
+        ),
+      },
     );
-    applyMenuAppearanceSettingsToForm(menuAppearance, { persistAdminColor: true });
+    applyMenuAppearanceSettingsToForm(menuAppearance, {
+      persistAdminColor: true,
+      persistAdminTheme: true,
+    });
 
     applyLogoBackgroundSettingsToForm(
       getLogoBackgroundSettingsFromMetadata(profileMenuMetadataCache),
@@ -1773,10 +1853,11 @@ async function cargarPerfil() {
     applyMenuAppearanceSettingsToForm(
       {
         admin_color: getCurrentPrimaryColor(),
+        admin_theme: getCurrentAdminTheme(),
         menu_color: DEFAULT_PRIMARY_COLOR,
         menu_theme: DEFAULT_MENU_THEME,
       },
-      { persistAdminColor: false },
+      { persistAdminColor: false, persistAdminTheme: false },
     );
     applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
   }
@@ -1940,6 +2021,7 @@ document.getElementById("guardarPerfilBtn").onclick = async () => {
       logo_background: logoBackgroundSettings,
       menu_appearance: menuAppearanceSettings,
       admin_color: menuAppearanceSettings.adminColor,
+      admin_theme: menuAppearanceSettings.adminTheme,
       menu_color: menuAppearanceSettings.menuColor,
       menu_theme: menuAppearanceSettings.menuTheme,
     };
