@@ -1884,6 +1884,53 @@ h1 svg {
     margin-top: 8px;
 }
 
+.profile-business-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.profile-business-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%),
+        rgba(13, 13, 13, 0.72);
+}
+
+.profile-business-group__header h5 {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-ui);
+}
+
+.profile-business-group__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-business-group__body .grid-2 {
+    gap: 10px;
+}
+
+.profile-business-group .field {
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.profile-business-group .hint {
+    margin-top: 8px;
+}
+
 .password-field {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

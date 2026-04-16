@@ -50,83 +50,103 @@
           </div>
         </div>
 
-        <div class="section-body">
-          <div class="grid-2">
-            <div class="field">
-              <label>Nombre</label>
-              <input id="perfilNombre" placeholder="Nombre del local" />
-            </div>
-            <div class="field">
-              <label>Telefono</label>
-              <input id="perfilTelefono" placeholder="+34 000 000 000" />
-            </div>
-          </div>
+        <div class="section-body profile-business-layout">
+          <article class="profile-business-group">
+            <header class="profile-business-group__header">
+              <h5>Informacion</h5>
+            </header>
 
-          <div class="grid-2">
-            <div class="field">
-              <label>Direccion</label>
-              <input id="perfilDireccion" placeholder="Calle, numero, ciudad" />
-            </div>
-            <div class="field">
-              <label>URL de resenas</label>
-              <input id="perfilReviews" placeholder="https://..." />
-            </div>
-          </div>
+            <div class="profile-business-group__body">
+              <div class="grid-2">
+                <div class="field">
+                  <label>Nombre</label>
+                  <input id="perfilNombre" placeholder="Nombre del local" />
+                </div>
+                <div class="field">
+                  <label>Telefono</label>
+                  <input id="perfilTelefono" placeholder="+34 000 000 000" />
+                </div>
+              </div>
 
-          <div class="grid-2">
-            <div class="field">
-              <label>Google Place ID</label>
-              <div class="inline-actions">
-                <input id="perfilGooglePlaceId" placeholder="ChIJ..." />
-                <button type="button" id="buscarPlaceIdBtn" class="secondaryBtn">
-                  Buscar Place ID
-                </button>
+              <div class="field">
+                <label>Direccion</label>
+                <input id="perfilDireccion" placeholder="Calle, numero, ciudad" />
               </div>
             </div>
-            <div class="field">
-              <label>WiFi (nombre de red)</label>
-              <input id="perfilWifi" placeholder="Nombre de la red" />
-            </div>
-          </div>
+          </article>
 
-          <div class="grid-2">
-            <div class="field">
-              <label>WiFi (clave)</label>
-              <input
-                id="perfilWifiPass"
-                type="text"
-                placeholder="Clave privada"
-                autocomplete="new-password"
-              />
-              <small class="hint">
-                La clave no se expone automaticamente en la carta.
-              </small>
-            </div>
+          <article class="profile-business-group">
+            <header class="profile-business-group__header">
+              <h5>Valoraciones</h5>
+            </header>
 
-            <div class="field">
-              <label>WiFi (PIN de acceso)</label>
-              <div class="password-field">
+            <div class="profile-business-group__body">
+              <div class="field">
+                <label>URL de resenas</label>
+                <input id="perfilReviews" placeholder="https://..." />
+              </div>
+
+              <div class="field">
+                <label>Google Place ID</label>
+                <div class="inline-actions">
+                  <input id="perfilGooglePlaceId" placeholder="ChIJ..." />
+                  <button type="button" id="buscarPlaceIdBtn" class="secondaryBtn">
+                    Buscar Place ID
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="profile-business-group">
+            <header class="profile-business-group__header">
+              <h5>WiFi</h5>
+            </header>
+
+            <div class="profile-business-group__body">
+              <div class="field">
+                <label>WiFi (nombre de red)</label>
+                <input id="perfilWifi" placeholder="Nombre de la red" />
+              </div>
+
+              <div class="field">
+                <label>WiFi (clave)</label>
                 <input
-                  id="perfilWifiPin"
-                  type="password"
-                  inputmode="numeric"
+                  id="perfilWifiPass"
+                  type="text"
+                  placeholder="Clave privada"
                   autocomplete="new-password"
-                  placeholder="PIN de 4 a 8 digitos"
                 />
-                <button
-                  type="button"
-                  id="perfilWifiPinToggleBtn"
-                  class="icon-ghost-btn"
-                  aria-label="Mostrar PIN"
-                >
-                  Ver
-                </button>
+                <small class="hint">
+                  La clave no se expone automaticamente en la carta.
+                </small>
               </div>
-              <small class="hint">
-                Si escribes uno nuevo, sustituira al PIN anterior al guardar.
-              </small>
+
+              <div class="field">
+                <label>WiFi (PIN de acceso)</label>
+                <div class="password-field">
+                  <input
+                    id="perfilWifiPin"
+                    type="password"
+                    inputmode="numeric"
+                    autocomplete="new-password"
+                    placeholder="PIN de 4 a 8 digitos"
+                  />
+                  <button
+                    type="button"
+                    id="perfilWifiPinToggleBtn"
+                    class="icon-ghost-btn"
+                    aria-label="Mostrar PIN"
+                  >
+                    Ver
+                  </button>
+                </div>
+                <small class="hint">
+                  Si escribes uno nuevo, sustituira al PIN anterior al guardar.
+                </small>
+              </div>
             </div>
-          </div>
+          </article>
         </div>
       </section>
 
