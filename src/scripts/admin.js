@@ -1604,16 +1604,8 @@ async function cargarPerfil() {
     perfilWifi.value = safeText(data.wifi_name);
     if (perfilWifiPass) perfilWifiPass.value = safeText(data.wifi_pass);
 
-    // El PIN no se puede leer (se guarda hasheado). Déjalo en blanco.
-    if (perfilWifiPin) {
-      perfilWifiPin.value = "";
-      perfilWifiPin.type = "password";
-    }
-    if (perfilWifiPinToggleBtn) {
-      perfilWifiPinToggleBtn.classList.remove("is-active");
-      perfilWifiPinToggleBtn.textContent = "Ver";
-      perfilWifiPinToggleBtn.setAttribute("aria-label", "Mostrar PIN");
-    }
+    if (perfilWifiPin) perfilWifiPin.value = safeText(data.wifi_pin);
+    syncPerfilWifiPinToggle({ resetVisibility: true });
 
     perfilReviews.value = safeText(data.reviews_url);
     setProfileMediaFromUrl("portada", safeText(data.portada_url));
@@ -1638,8 +1630,28 @@ async function cargarPerfil() {
   } else {
     profileMenuMetadataCache = {};
     SUBCATEGORIAS_POR_CATEGORIA = {};
+    if (perfilWifiPin) perfilWifiPin.value = "";
+    syncPerfilWifiPinToggle({ resetVisibility: true });
     applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
   }
+}
+
+function syncPerfilWifiPinToggle({ resetVisibility = false } = {}) {
+  if (!perfilWifiPin || !perfilWifiPinToggleBtn) return;
+
+  const hasPinValue = Boolean(safeText(perfilWifiPin.value).trim());
+  if (resetVisibility || !hasPinValue) {
+    perfilWifiPin.type = "password";
+  }
+
+  const isShowing = perfilWifiPin.type === "text" && hasPinValue;
+  perfilWifiPinToggleBtn.classList.toggle("is-active", isShowing);
+  perfilWifiPinToggleBtn.textContent = isShowing ? "Ocultar" : "Ver";
+  perfilWifiPinToggleBtn.disabled = !hasPinValue;
+  perfilWifiPinToggleBtn.setAttribute(
+    "aria-label",
+    isShowing ? "Ocultar PIN" : "Mostrar PIN",
+  );
 }
 
 perfilPortadaUrl?.addEventListener("input", () => {
@@ -1731,16 +1743,20 @@ perfilSlugOpenBtn?.addEventListener("click", () => {
   window.open(url, "_blank", "noopener");
 });
 
+perfilWifiPin?.addEventListener("input", () => {
+  syncPerfilWifiPinToggle();
+});
+
 perfilWifiPinToggleBtn?.addEventListener("click", () => {
   if (!perfilWifiPin) return;
+  const hasPinValue = Boolean(safeText(perfilWifiPin.value).trim());
+  if (!hasPinValue) {
+    syncPerfilWifiPinToggle({ resetVisibility: true });
+    return;
+  }
   const shouldShow = perfilWifiPin.type === "password";
   perfilWifiPin.type = shouldShow ? "text" : "password";
-  perfilWifiPinToggleBtn.classList.toggle("is-active", shouldShow);
-  perfilWifiPinToggleBtn.textContent = shouldShow ? "Ocultar" : "Ver";
-  perfilWifiPinToggleBtn.setAttribute(
-    "aria-label",
-    shouldShow ? "Ocultar PIN" : "Mostrar PIN",
-  );
+  syncPerfilWifiPinToggle();
 });
 
 profileImageGalleryBackdrop?.addEventListener("click", closeProfileImageGalleryModal);

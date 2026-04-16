@@ -1956,6 +1956,12 @@ h1 svg {
     background: var(--accent-soft-alt);
 }
 
+.icon-ghost-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .profile-media-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3124,6 +3130,24 @@ h1 svg {
     .card-actions,
     .profile-media-card__actions {
         width: 100%;
+    }
+
+    .profile-media-card__actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .profile-media-card__actions .secondaryBtn,
+    .profile-media-card__actions .cancel {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.2;
+        white-space: normal;
+        text-align: center;
     }
 
     .card-actions .btn-editar,
