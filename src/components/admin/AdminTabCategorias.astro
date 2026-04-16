@@ -16,6 +16,41 @@
             <label for="categoriaNombre">Nombre de la categoria</label>
             <input id="categoriaNombre" placeholder="Nombre de categoria" />
           </div>
+
+          <div
+            id="categoriaSubcategoriasEditor"
+            class="category-subeditor"
+            style="display: none"
+          >
+            <div class="category-subeditor__head">
+              <div>
+                <h3>Subcategorias</h3>
+                <p>
+                  Las que crees aqui apareceran luego al seleccionar esta
+                  categoria en un plato.
+                </p>
+              </div>
+            </div>
+
+            <div class="category-subeditor__create">
+              <input
+                id="categoriaSubcategoriaNombre"
+                placeholder="Nueva subcategoria"
+              />
+              <button
+                id="addCategoriaSubcategoriaBtn"
+                type="button"
+                class="secondaryBtn"
+              >
+                Anadir
+              </button>
+            </div>
+
+            <div
+              id="categoriaSubcategoriasList"
+              class="category-subeditor__list"
+            ></div>
+          </div>
         </div>
 
         <div class="form-actions">
@@ -39,7 +74,7 @@
             <h2>Categorias registradas</h2>
             <p>
               Cada tarjeta resume las categorias activas y las subcategorias
-              detectadas en tus platos.
+              creadas para usarlas despues en tus platos.
             </p>
           </div>
         </div>

@@ -839,15 +839,80 @@ h1 svg {
     color: var(--text);
 }
 
-#platoCategoria[multiple] {
-    min-height: 150px;
-    padding: 8px;
+#platoCategoria,
+#platoSubcategoria {
+    min-height: 46px;
 }
 
-#platoCategoria[multiple] option {
-    padding: 8px 10px;
-    border-radius: 8px;
-    margin-bottom: 4px;
+.category-subeditor {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--panel-2);
+    padding: 14px;
+}
+
+.category-subeditor__head h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.category-subeditor__head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.category-subeditor__create {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.category-subeditor__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.category-subeditor__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.category-subeditor__item-main {
+    min-width: 0;
+}
+
+.category-subeditor__item-name {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.category-subeditor__item-meta {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.category-subeditor__item-remove {
+    min-width: 92px;
+}
+
+.category-subeditor__empty {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    color: var(--muted);
+    font-size: 13px;
 }
 
 .form-box input[type="file"] {
@@ -982,11 +1047,6 @@ h1 svg {
         min-height: 48px;
         padding: 12px 14px;
         font-size: 15px;
-    }
-
-    #platoCategoria[multiple] {
-        min-height: 184px;
-        padding: 10px;
     }
 
     .form-box input[type="file"] {
@@ -2309,18 +2369,11 @@ h1 svg {
     color: var(--accent-ui);
 }
 
-#platoCategoria[multiple] {
-    min-height: 224px;
-    padding: 10px;
+#platoCategoria,
+#platoSubcategoria {
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 26%),
         #111111;
-}
-
-#platoCategoria[multiple] option {
-    margin-bottom: 6px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.03);
 }
 
 .content-card--placeholder {
@@ -2704,6 +2757,15 @@ h1 svg {
 }
 
 @media (max-width: 720px) {
+    .category-subeditor__create {
+        grid-template-columns: 1fr;
+    }
+
+    .category-subeditor__item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .menu-row-head,
     .menu-editor-section-head,
     .menu-editor-actions {

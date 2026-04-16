@@ -39,17 +39,17 @@
 
           <div class="field">
             <label for="platoSubcategoria">Subcategoria</label>
-            <input
-              id="platoSubcategoria"
-              placeholder="Subcategoria (ej. Especial)"
-            />
+            <select id="platoSubcategoria" disabled></select>
+            <small id="platoSubcategoriaHint" class="hint">
+              Selecciona una categoria para ver sus subcategorias.
+            </small>
           </div>
 
           <div class="field">
-            <label for="platoCategoria">Categorias</label>
-            <select id="platoCategoria" multiple size="8"></select>
+            <label for="platoCategoria">Categoria</label>
+            <select id="platoCategoria"></select>
             <small class="hint">
-              Puedes seleccionar varias categorias con `Ctrl` o `Cmd`.
+              Cada plato pertenece a una sola categoria.
             </small>
           </div>
 

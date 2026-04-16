@@ -448,11 +448,12 @@ function parseCategoryIds(rawValue) {
 }
 
 function getDishCategoryIds(plato) {
+  const single = Number(plato?.categoria_id);
+  if (Number.isFinite(single)) return [single];
   const multiRaw = pick(plato, DISH_MULTI_CATEGORY_KEYS);
   const multi = parseCategoryIds(multiRaw);
   if (multi.length) return multi;
-  const single = Number(plato?.categoria_id);
-  return Number.isFinite(single) ? [single] : [];
+  return [];
 }
 
 function getDishPrimaryCategoryId(plato) {

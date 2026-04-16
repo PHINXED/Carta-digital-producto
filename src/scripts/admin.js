@@ -31,6 +31,17 @@ const PROFILE_LOGO_KEYS = [
   "logo",
   "emblema",
 ];
+const PROFILE_MENU_METADATA_KEYS = ["personalizacion_menu"];
+const MENU_SUBCATEGORIA_BY_CATEGORY_KEYS = [
+  "subcategorias_por_categoria",
+  "subcategorias_by_category",
+  "subcategories_by_category",
+];
+const MENU_SUBCATEGORIA_CATALOG_KEYS = [
+  "subcategorias_catalogo",
+  "subcategorias",
+  "subcategories",
+];
 const MENU_MULTI_CATEGORY_KEYS = [
   "categorias_ids",
   "categoria_ids",
@@ -98,6 +109,8 @@ let ALL_MENUS_COMPUESTOS = [];
 let ALL_MENUS_PROGRAMACION = [];
 let ALL_MENUS_CAMPOS = [];
 let ALL_MENUS_CAMPOS_PLATOS = [];
+let SUBCATEGORIAS_POR_CATEGORIA = {};
+let profileMenuMetadataCache = {};
 let menuEditorState = null;
 let menuEditorFieldSeq = 0;
 let menuDishPickerState = null;
@@ -183,6 +196,18 @@ const categoriaNombre = document.getElementById("categoriaNombre");
 const guardarCategoriaBtn = document.getElementById("guardarCategoriaBtn");
 const cancelCategoriaBtn = document.getElementById("cancelCategoriaBtn");
 const categoriaFormTitle = document.getElementById("categoria-form-title");
+const categoriaSubcategoriasEditor = document.getElementById(
+  "categoriaSubcategoriasEditor",
+);
+const categoriaSubcategoriaNombre = document.getElementById(
+  "categoriaSubcategoriaNombre",
+);
+const addCategoriaSubcategoriaBtn = document.getElementById(
+  "addCategoriaSubcategoriaBtn",
+);
+const categoriaSubcategoriasList = document.getElementById(
+  "categoriaSubcategoriasList",
+);
 
 // PLATOS (form)
 const editPlatoId = document.getElementById("editPlatoId");
@@ -201,6 +226,7 @@ const platoImagenPreview = document.getElementById("platoImagenPreview");
 const guardarPlatoBtn = document.getElementById("guardarPlatoBtn");
 const cancelPlatoBtn = document.getElementById("cancelPlatoBtn");
 const platoFormTitle = document.getElementById("plato-form-title");
+const platoSubcategoriaHint = document.getElementById("platoSubcategoriaHint");
 const platoEditAside = document.getElementById("platoEditAside");
 const platoEditAsideBody = document.getElementById("platoEditAsideBody");
 const platoImagenGalleryModal = document.getElementById("platoImagenGalleryModal");
@@ -298,6 +324,21 @@ function pickFirst(obj, keys) {
   return null;
 }
 
+function parseJsonObjectValue(value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {}
+  }
+  return null;
+}
+
 function toNullableInputValue(value) {
   const text = safeText(value).trim();
   return text || null;
@@ -314,6 +355,77 @@ function getMenuWeekdayLabel(value) {
   if (weekday == null) return "";
   const item = MENU_WEEKDAY_OPTIONS.find((entry) => entry.value === weekday);
   return item?.label || "";
+}
+
+function normalizeCategoryId(value) {
+  const numeric = Number(value);
+  if (!Number.isInteger(numeric) || numeric <= 0) return null;
+  return numeric;
+}
+
+function normalizeSubcategoriaLabel(value) {
+  return safeText(value)
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function normalizeSubcategoriaCatalogValue(value) {
+  return safeText(value).trim().replace(/\s+/g, " ");
+}
+
+function dedupeSubcategoriasCatalog(values) {
+  const deduped = new Map();
+  (values || []).forEach((entry) => {
+    const label = normalizeSubcategoriaCatalogValue(entry);
+    if (!label) return;
+    const normalized = normalizeSubcategoriaLabel(label);
+    if (!normalized || deduped.has(normalized)) return;
+    deduped.set(normalized, label);
+  });
+  return Array.from(deduped.values()).sort((a, b) =>
+    a.localeCompare(b, "es", { sensitivity: "base" }),
+  );
+}
+
+function normalizeSubcategoriaCategoryKey(value) {
+  const numeric = normalizeCategoryId(value);
+  if (numeric != null) return safeText(numeric);
+  const text = safeText(value).trim();
+  return text || "";
+}
+
+function normalizeSubcategoriasByCategoria(value) {
+  const normalizedMap = {};
+  const source = parseJsonObjectValue(value);
+  if (!source) return normalizedMap;
+
+  Object.entries(source).forEach(([rawKey, rawItems]) => {
+    const key = normalizeSubcategoriaCategoryKey(rawKey);
+    if (!key) return;
+    const items = dedupeSubcategoriasCatalog(
+      Array.isArray(rawItems) ? rawItems : [rawItems],
+    );
+    if (!items.length) return;
+    normalizedMap[key] = items;
+  });
+
+  return normalizedMap;
+}
+
+function getProfileMenuMetadata(profileData) {
+  const metadata = parseJsonObjectValue(
+    pickFirst(profileData, PROFILE_MENU_METADATA_KEYS),
+  );
+  return metadata && typeof metadata === "object" ? { ...metadata } : {};
+}
+
+function extractSubcategoriasByCategoria(profileData) {
+  const menuMetadata = getProfileMenuMetadata(profileData);
+  const rawByCategory = pickFirst(menuMetadata, MENU_SUBCATEGORIA_BY_CATEGORY_KEYS);
+  return normalizeSubcategoriasByCategoria(rawByCategory);
 }
 
 function parseCategoryIds(rawValue) {
@@ -346,11 +458,12 @@ function parseCategoryIds(rawValue) {
 }
 
 function getPlatoCategoryIds(plato) {
+  const single = Number(plato?.categoria_id);
+  if (Number.isFinite(single)) return [single];
   const multiRaw = pickFirst(plato, MENU_MULTI_CATEGORY_KEYS);
   const multi = parseCategoryIds(multiRaw);
   if (multi.length) return multi;
-  const single = Number(plato?.categoria_id);
-  return Number.isFinite(single) ? [single] : [];
+  return [];
 }
 
 function normalizeHexColor(value) {
@@ -1074,27 +1187,157 @@ function renderAdminAllergenBadges(allergens = []) {
   return `<div class="plato-alergenos">${icons}</div>`;
 }
 
+function getConfiguredSubcategoriasByCategoria(categoryId) {
+  const key = normalizeSubcategoriaCategoryKey(categoryId);
+  return dedupeSubcategoriasCatalog(SUBCATEGORIAS_POR_CATEGORIA?.[key] || []);
+}
+
 function getCategorySubcategories(categoryId) {
   const bucket = new Map();
+  getConfiguredSubcategoriasByCategoria(categoryId).forEach((name) => {
+    bucket.set(normalizeSubcategoriaLabel(name), {
+      name,
+      total: 0,
+      active: 0,
+      configured: true,
+    });
+  });
 
   ALL_PLATOS.forEach((plato) => {
     if (!getPlatoCategoryIds(plato).includes(Number(categoryId))) return;
     const name = safeText(plato.subcategoria).trim();
     if (!name) return;
-
-    const current = bucket.get(name) || {
+    const normalized = normalizeSubcategoriaLabel(name);
+    const current = bucket.get(normalized) || {
       name,
       total: 0,
       active: 0,
+      configured: false,
     };
     current.total += 1;
     if (plato.activo) current.active += 1;
-    bucket.set(name, current);
+    bucket.set(normalized, current);
   });
 
   return [...bucket.values()].sort((a, b) =>
     a.name.localeCompare(b.name, "es", { sensitivity: "base" }),
   );
+}
+
+function getAvailableSubcategoriasForCategoria(categoryId) {
+  return getCategorySubcategories(categoryId).map((item) => item.name);
+}
+
+function getAllConfiguredSubcategorias() {
+  return dedupeSubcategoriasCatalog(
+    Object.values(SUBCATEGORIAS_POR_CATEGORIA || {}).flat(),
+  );
+}
+
+async function persistSubcategoriasCatalog() {
+  const currentUser = await requireUser();
+  const personalizacionMenu = {
+    ...profileMenuMetadataCache,
+    subcategorias_catalogo: getAllConfiguredSubcategorias(),
+    subcategorias_por_categoria: normalizeSubcategoriasByCategoria(
+      SUBCATEGORIAS_POR_CATEGORIA,
+    ),
+  };
+
+  const { data: existing, error: existingError } = await db
+    .from("Perfil")
+    .select("user_id")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+  if (existingError) throw existingError;
+
+  const writer = existing
+    ? db
+        .from("Perfil")
+        .update({ personalizacion_menu: personalizacionMenu })
+        .eq("user_id", currentUser.id)
+    : db
+        .from("Perfil")
+        .insert({ user_id: currentUser.id, personalizacion_menu: personalizacionMenu });
+
+  const { error } = await writer;
+  if (error) throw error;
+
+  profileMenuMetadataCache = { ...personalizacionMenu };
+  SUBCATEGORIAS_POR_CATEGORIA = normalizeSubcategoriasByCategoria(
+    personalizacionMenu.subcategorias_por_categoria,
+  );
+}
+
+function renderCategoriaSubcategoriasEditor() {
+  if (!categoriaSubcategoriasEditor || !categoriaSubcategoriasList) return;
+  const categoryId = editCategoriaId?.value;
+  if (!categoryId) {
+    categoriaSubcategoriasEditor.style.display = "none";
+    categoriaSubcategoriasList.innerHTML = "";
+    if (categoriaSubcategoriaNombre) categoriaSubcategoriaNombre.value = "";
+    return;
+  }
+
+  categoriaSubcategoriasEditor.style.display = "";
+  const subcategorias = getCategorySubcategories(categoryId);
+  if (!subcategorias.length) {
+    categoriaSubcategoriasList.innerHTML =
+      '<div class="category-subeditor__empty">Todavia no has creado subcategorias para esta categoria.</div>';
+    return;
+  }
+
+  categoriaSubcategoriasList.innerHTML = subcategorias
+    .map((item) => {
+      const canDelete = item.total === 0;
+      const usageLabel = item.total
+        ? `${item.active}/${item.total} platos activos`
+        : "Sin platos vinculados";
+      return `
+        <div class="category-subeditor__item">
+          <div class="category-subeditor__item-main">
+            <div class="category-subeditor__item-name">${escapeHtml(item.name)}</div>
+            <div class="category-subeditor__item-meta">${escapeHtml(usageLabel)}</div>
+          </div>
+          <button
+            type="button"
+            class="btn-eliminar category-subeditor__item-remove"
+            data-role="remove-category-subcat"
+            data-subcat="${escapeHtml(item.name)}"
+            ${canDelete ? "" : 'disabled title="Esta subcategoria tiene platos asignados"'}
+          >
+            Quitar
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+
+  categoriaSubcategoriasList
+    .querySelectorAll("[data-role='remove-category-subcat']")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        const subcatName = safeText(button.dataset.subcat).trim();
+        if (!subcatName) return;
+        const categoryKey = normalizeSubcategoriaCategoryKey(categoryId);
+        const nextValues = getConfiguredSubcategoriasByCategoria(categoryId).filter(
+          (entry) => normalizeSubcategoriaLabel(entry) !== normalizeSubcategoriaLabel(subcatName),
+        );
+        if (nextValues.length) {
+          SUBCATEGORIAS_POR_CATEGORIA[categoryKey] = nextValues;
+        } else {
+          delete SUBCATEGORIAS_POR_CATEGORIA[categoryKey];
+        }
+        try {
+          await persistSubcategoriasCatalog();
+          renderCategoriaSubcategoriasEditor();
+          renderCategoriasList();
+          updatePlatoSubcategoriaOptions(platoCategoria?.value);
+        } catch (error) {
+          alert(error?.message || "No se pudo quitar la subcategoria.");
+        }
+      });
+    });
 }
 
 async function uploadToStorage(file, folder) {
@@ -1228,6 +1471,9 @@ async function cargarPerfil() {
   }
 
   if (data) {
+    profileMenuMetadataCache = getProfileMenuMetadata(data);
+    SUBCATEGORIAS_POR_CATEGORIA = extractSubcategoriasByCategoria(data);
+
     perfilNombre.value = safeText(data.nombre);
     perfilSlug.value = safeText(data.slug);
     if (perfilSlugUrl) perfilSlugUrl.value = menuUrlFromSlug(data.slug);
@@ -1265,6 +1511,9 @@ async function cargarPerfil() {
     } else {
       markActiveSwatches(getCurrentPrimaryColor());
     }
+  } else {
+    profileMenuMetadataCache = {};
+    SUBCATEGORIAS_POR_CATEGORIA = {};
   }
 }
 
@@ -1727,6 +1976,7 @@ async function cargarCategorias() {
   // Select del form de platos + select del filtro
   actualizarSelectCategorias(ALL_CATEGORIAS);
   fillPlatosCategoriaFilter(ALL_CATEGORIAS);
+  renderCategoriaSubcategoriasEditor();
 }
 
 function renderCategoriasList() {
@@ -1749,7 +1999,6 @@ function renderCategoriasList() {
     div.className = "categoria-item" + (cat.activa ? "" : " inactiva");
     div.dataset.id = cat.id;
     const subcategorias = getCategorySubcategories(cat.id);
-    const activeSubcategories = subcategorias.filter((item) => item.active > 0).length;
     const dishesCount = ALL_PLATOS.filter((plato) =>
       getPlatoCategoryIds(plato).includes(Number(cat.id)),
     ).length;
@@ -1763,7 +2012,11 @@ function renderCategoriasList() {
                 (item) => `
                   <div class="category-card__subitem">
                     <div class="category-card__subitem-name">${safeText(item.name)}</div>
-                    <div class="category-card__subitem-meta">${item.active}/${item.total} platos activos</div>
+                    <div class="category-card__subitem-meta">${
+                      item.total
+                        ? `${item.active}/${item.total} platos activos`
+                        : "Sin platos asignados"
+                    }</div>
                   </div>
                 `,
               )
@@ -1774,7 +2027,7 @@ function renderCategoriasList() {
       : `
         <div class="category-card__subsection">
           <div class="category-card__subheading">Subcategorias</div>
-          <div class="category-card__empty">Todavia no hay subcategorias detectadas en esta categoria.</div>
+          <div class="category-card__empty">Todavia no hay subcategorias creadas en esta categoria.</div>
         </div>
       `;
 
@@ -1788,7 +2041,7 @@ function renderCategoriasList() {
               <div class="category-card__title">${safeText(cat.nombre)}</div>
               <div class="category-card__meta">
                 <span class="status-pill ${cat.activa ? "is-on" : ""}">${cat.activa ? "Visible" : "Oculta"}</span>
-                <span class="meta-pill">${activeSubcategories}/${subcategorias.length || 0} subcategorias activas</span>
+                <span class="meta-pill">${subcategorias.length || 0} subcategorias</span>
                 <span class="meta-pill">${dishesCount} platos vinculados</span>
               </div>
             </div>
@@ -1830,24 +2083,38 @@ function renderCategoriasList() {
 }
 
 function actualizarSelectCategorias(categorias) {
-  const prevSelected = new Set(
-    Array.from(platoCategoria?.selectedOptions || []).map((o) => String(o.value)),
-  );
+  if (!platoCategoria) return;
+  const prevSelected = safeText(platoCategoria.value).trim();
   platoCategoria.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent =
+    categorias && categorias.length
+      ? "Selecciona una categoria"
+      : "Crea una categoria primero";
+  platoCategoria.appendChild(placeholder);
+  platoCategoria.disabled = !(categorias && categorias.length);
+
   if (!categorias || !categorias.length) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "Crea una categoría primero";
-    platoCategoria.appendChild(opt);
+    platoCategoria.value = "";
+    updatePlatoSubcategoriaOptions("");
     return;
   }
   categorias.forEach((c) => {
     const opt = document.createElement("option");
     opt.value = c.id;
     opt.textContent = c.nombre;
-    opt.selected = prevSelected.has(String(c.id));
     platoCategoria.appendChild(opt);
   });
+
+  if ([...platoCategoria.options].some((option) => option.value === prevSelected)) {
+    platoCategoria.value = prevSelected;
+  } else {
+    platoCategoria.value = "";
+  }
+
+  updatePlatoSubcategoriaOptions(platoCategoria.value, platoSubcategoria?.value);
 }
 
 function fillPlatosCategoriaFilter(categorias) {
@@ -1868,12 +2135,65 @@ function fillPlatosCategoriaFilter(categorias) {
   }
 }
 
+function updatePlatoSubcategoriaOptions(categoryId, selectedValue = "") {
+  if (!(platoSubcategoria instanceof HTMLSelectElement)) return;
+  const normalizedCategoryId = normalizeCategoryId(categoryId);
+  const subcategorias =
+    normalizedCategoryId != null
+      ? getAvailableSubcategoriasForCategoria(normalizedCategoryId)
+      : [];
+
+  platoSubcategoria.innerHTML = "";
+
+  if (normalizedCategoryId == null) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Selecciona una categoria primero";
+    platoSubcategoria.appendChild(option);
+    platoSubcategoria.disabled = true;
+    if (platoSubcategoriaHint) {
+      platoSubcategoriaHint.textContent =
+        "Selecciona una categoria para ver sus subcategorias.";
+    }
+    return;
+  }
+
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "";
+  emptyOption.textContent = subcategorias.length
+    ? "Sin subcategoria"
+    : "No hay subcategorias creadas";
+  platoSubcategoria.appendChild(emptyOption);
+
+  subcategorias.forEach((subcat) => {
+    const option = document.createElement("option");
+    option.value = subcat;
+    option.textContent = subcat;
+    platoSubcategoria.appendChild(option);
+  });
+
+  platoSubcategoria.disabled = subcategorias.length === 0;
+  if (platoSubcategoriaHint) {
+    platoSubcategoriaHint.textContent = subcategorias.length
+      ? "Solo se muestran las subcategorias de la categoria seleccionada."
+      : "Esta categoria no tiene subcategorias creadas todavia.";
+  }
+
+  const normalizedSelected = normalizeSubcategoriaLabel(selectedValue);
+  const matchingOption = [...platoSubcategoria.options].find(
+    (option) => normalizeSubcategoriaLabel(option.value) === normalizedSelected,
+  );
+  platoSubcategoria.value = matchingOption ? matchingOption.value : "";
+}
+
 function editarCategoria(id) {
   const cat = ALL_CATEGORIAS.find((c) => String(c.id) === String(id));
   editCategoriaId.value = id;
   categoriaNombre.value = cat?.nombre || "";
   categoriaFormTitle.textContent = "Editar categoria";
   cancelCategoriaBtn.style.display = "";
+  renderCategoriaSubcategoriasEditor();
+  categoriaSubcategoriaNombre?.focus();
 }
 
 cancelCategoriaBtn.onclick = () => {
@@ -1881,6 +2201,7 @@ cancelCategoriaBtn.onclick = () => {
   categoriaNombre.value = "";
   categoriaFormTitle.textContent = "Nueva categoria";
   cancelCategoriaBtn.style.display = "none";
+  renderCategoriaSubcategoriasEditor();
 };
 
 guardarCategoriaBtn.onclick = async () => {
@@ -1903,6 +2224,45 @@ guardarCategoriaBtn.onclick = async () => {
   await cargarPlatos();
 };
 
+async function addCategoriaSubcategoria() {
+  const categoryId = safeText(editCategoriaId?.value).trim();
+  if (!categoryId) {
+    alert("Primero edita una categoria para anadir subcategorias.");
+    return;
+  }
+
+  const nuevoNombre = safeText(categoriaSubcategoriaNombre?.value).trim();
+  if (!nuevoNombre) {
+    alert("Escribe un nombre para la subcategoria.");
+    return;
+  }
+
+  const current = getConfiguredSubcategoriasByCategoria(categoryId);
+  const alreadyExists = getCategorySubcategories(categoryId).some(
+    (entry) =>
+      normalizeSubcategoriaLabel(entry.name) === normalizeSubcategoriaLabel(nuevoNombre),
+  );
+  if (alreadyExists) {
+    alert("Esa subcategoria ya existe en esta categoria.");
+    return;
+  }
+
+  SUBCATEGORIAS_POR_CATEGORIA[normalizeSubcategoriaCategoryKey(categoryId)] = [
+    ...current,
+    nuevoNombre,
+  ];
+
+  try {
+    await persistSubcategoriasCatalog();
+    if (categoriaSubcategoriaNombre) categoriaSubcategoriaNombre.value = "";
+    renderCategoriaSubcategoriasEditor();
+    renderCategoriasList();
+    updatePlatoSubcategoriaOptions(platoCategoria?.value);
+  } catch (error) {
+    alert(error?.message || "No se pudo guardar la subcategoria.");
+  }
+}
+
 async function toggleCategoria(id) {
   const cat = ALL_CATEGORIAS.find((c) => String(c.id) === String(id));
   await db.from("Categorias").update({ activa: !cat.activa }).eq("id", id);
@@ -1914,7 +2274,16 @@ async function eliminarCategoria(id) {
     !confirm("¿Eliminar categoría? También se quedarán platos sin categoría.")
   )
     return;
+  if (idsEqual(editCategoriaId?.value, id)) {
+    cancelCategoriaBtn.onclick();
+  }
   await db.from("Categorias").delete().eq("id", id);
+  delete SUBCATEGORIAS_POR_CATEGORIA[normalizeSubcategoriaCategoryKey(id)];
+  try {
+    await persistSubcategoriasCatalog();
+  } catch (error) {
+    alert(error?.message || "No se pudo limpiar las subcategorias de la categoria.");
+  }
   await cargarCategorias();
   await cargarPlatos();
 }
@@ -1948,10 +2317,8 @@ function resetPlatoForm() {
   platoNombre.value = "";
   platoDescripcion.value = "";
   platoPrecio.value = "";
-  platoSubcategoria.value = "";
-  Array.from(platoCategoria?.options || []).forEach((opt) => {
-    opt.selected = false;
-  });
+  if (platoCategoria) platoCategoria.value = "";
+  updatePlatoSubcategoriaOptions("");
   setPlatoImageFromUrl("", { status: "Sin imagen seleccionada." });
   platoFormTitle.textContent = "Nuevo plato";
   cancelPlatoBtn.style.display = "none";
@@ -1960,6 +2327,17 @@ function resetPlatoForm() {
   if (platoEditAside) platoEditAside.style.display = "none";
   if (platoEditAsideBody) platoEditAsideBody.innerHTML = "";
 }
+
+addCategoriaSubcategoriaBtn?.addEventListener("click", addCategoriaSubcategoria);
+categoriaSubcategoriaNombre?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  void addCategoriaSubcategoria();
+});
+
+platoCategoria?.addEventListener("change", () => {
+  updatePlatoSubcategoriaOptions(platoCategoria.value);
+});
 
 platoImagenUrl?.addEventListener("input", () => {
   setPlatoImageFromUrl(platoImagenUrl.value, { clearFile: false });
@@ -2126,11 +2504,9 @@ function editarPlato(id) {
   platoNombre.value = p.plato || "";
   platoDescripcion.value = p.descripcion || "";
   platoPrecio.value = p.precio ?? "";
-  platoSubcategoria.value = p.subcategoria || "";
-  const selectedCatIds = new Set(getPlatoCategoryIds(p).map((id) => String(id)));
-  Array.from(platoCategoria?.options || []).forEach((opt) => {
-    opt.selected = selectedCatIds.has(String(opt.value));
-  });
+  const selectedCategoryId = safeText(getPlatoCategoryIds(p)[0] || "");
+  if (platoCategoria) platoCategoria.value = selectedCategoryId;
+  updatePlatoSubcategoriaOptions(selectedCategoryId, p.subcategoria || "");
   setPlatoImageFromUrl(p.imagen_url || "", {
     status: p.imagen_url
       ? "Mostrando imagen actual del plato."
@@ -2230,11 +2606,8 @@ guardarPlatoBtn.onclick = async () => {
   const nombre = platoNombre.value.trim();
   if (!nombre) return alert("Pon un nombre");
 
-  const selectedCatIds = Array.from(platoCategoria?.selectedOptions || [])
-    .map((opt) => Number(opt.value))
-    .filter((n) => Number.isFinite(n));
-  const primaryCatId = selectedCatIds[0] || null;
-  if (!primaryCatId) return alert("Selecciona al menos una categoría");
+  const primaryCatId = normalizeCategoryId(platoCategoria?.value);
+  if (!primaryCatId) return alert("Selecciona una categoria");
 
   try {
     const currentUser = await requireUser();
@@ -2252,101 +2625,18 @@ guardarPlatoBtn.onclick = async () => {
       descripcion: platoDescripcion.value.trim() || null,
       precio: platoPrecio.value !== "" ? Number(platoPrecio.value) : null,
       categoria_id: primaryCatId,
-      subcategoria: platoSubcategoria.value.trim() || null,
+      subcategoria: toNullableInputValue(platoSubcategoria?.value),
       imagen_url: imgFinal || null,
       alergenos: alergenosSeleccionados,
       user_id: currentUser.id,
     };
 
     const id = editPlatoId.value;
-    const upsertMenu = (writePayload) =>
-      id
-        ? db.from("Menu").update(writePayload).eq("id", id)
-        : db
-            .from("Menu")
-            .insert({ ...writePayload, activo: true, orden: 0 });
-
-    const isOptionalMenuCategoriesError = (err) => {
-      const msg = safeText(err?.message).toLowerCase();
-      const mentionsCategory =
-        msg.includes("categ") ||
-        msg.includes("category") ||
-        msg.includes("categories");
-      const isMissingCol =
-        msg.includes("column") ||
-        msg.includes("does not exist") ||
-        msg.includes("schema cache") ||
-        msg.includes("unknown");
-      const isTypeIssue =
-        msg.includes("invalid input syntax") ||
-        msg.includes("malformed array") ||
-        msg.includes("is of type") ||
-        msg.includes("cannot cast");
-      return mentionsCategory && (isMissingCol || isTypeIssue);
-    };
-
-    const buildMenuCategoryCandidates = (basePayload) => {
-      const candidates = [];
-      const seen = new Set();
-      const addCandidate = (candidatePayload) => {
-        const signature = JSON.stringify(
-          Object.entries(candidatePayload).sort(([a], [b]) =>
-            a.localeCompare(b),
-          ),
-        );
-        if (seen.has(signature)) return;
-        seen.add(signature);
-        candidates.push(candidatePayload);
-      };
-
-      for (const key of MENU_MULTI_CATEGORY_KEYS) {
-        addCandidate({
-          ...basePayload,
-          [key]: selectedCatIds,
-        });
-      }
-      for (const key of MENU_MULTI_CATEGORY_KEYS) {
-        addCandidate({
-          ...basePayload,
-          [key]: selectedCatIds.join(","),
-        });
-      }
-      for (const key of MENU_MULTI_CATEGORY_KEYS) {
-        addCandidate({
-          ...basePayload,
-          [key]: JSON.stringify(selectedCatIds),
-        });
-      }
-      return candidates;
-    };
-
-    let error = null;
-    let categorySaved = false;
-    for (const categoryPayload of buildMenuCategoryCandidates(payload)) {
-      const { error: categoryErr } = await upsertMenu(categoryPayload);
-      if (!categoryErr) {
-        categorySaved = true;
-        error = null;
-        break;
-      }
-      if (!isOptionalMenuCategoriesError(categoryErr)) {
-        error = categoryErr;
-        break;
-      }
-      error = categoryErr;
-    }
-
-    if (!categorySaved && !error) {
-      const { error: fallbackErr } = await upsertMenu(payload);
-      error = fallbackErr || null;
-    } else if (!categorySaved && isOptionalMenuCategoriesError(error)) {
-      console.warn(
-        "Menu sin columna compatible para múltiples categorías. Guardando con categoría principal.",
-        error.message,
-      );
-      const { error: fallbackErr } = await upsertMenu(payload);
-      error = fallbackErr || null;
-    }
+    const { error } = id
+      ? await db.from("Menu").update(payload).eq("id", id)
+      : await db
+          .from("Menu")
+          .insert({ ...payload, activo: true, orden: 0 });
     if (error) throw error;
 
     resetPlatoForm();
