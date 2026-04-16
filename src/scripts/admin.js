@@ -35,10 +35,37 @@ const PROFILE_MENU_METADATA_KEYS = ["personalizacion_menu"];
 const MENU_LOGO_BACKGROUND_KEYS = ["logo_background", "logo_bg", "fondo_logo"];
 const LOGO_BACKGROUND_MODE_SOLID = "solid";
 const LOGO_BACKGROUND_MODE_TRANSPARENT = "transparent";
+const MENU_THEME_LIGHT = "light";
+const MENU_THEME_DARK = "dark";
+const DEFAULT_MENU_THEME = MENU_THEME_LIGHT;
+const MENU_APPEARANCE_KEYS = ["menu_appearance", "appearance", "apariencia_menu"];
+const MENU_APPEARANCE_ADMIN_COLOR_KEYS = [
+  "admin_color",
+  "color_admin",
+  "adminColor",
+];
+const MENU_APPEARANCE_MENU_COLOR_KEYS = [
+  "menu_color",
+  "color_menu",
+  "public_color",
+  "color_publico",
+  "menuColor",
+];
+const MENU_APPEARANCE_THEME_KEYS = [
+  "menu_theme",
+  "theme",
+  "tema",
+  "menuTheme",
+];
 const DEFAULT_LOGO_BACKGROUND_SETTINGS = Object.freeze({
   mode: LOGO_BACKGROUND_MODE_SOLID,
   color: "#FFFFFF",
   opacity: 82,
+});
+const DEFAULT_MENU_APPEARANCE_SETTINGS = Object.freeze({
+  adminColor: DEFAULT_PRIMARY_COLOR,
+  menuColor: DEFAULT_PRIMARY_COLOR,
+  menuTheme: DEFAULT_MENU_THEME,
 });
 const MENU_SUBCATEGORIA_BY_CATEGORY_KEYS = [
   "subcategorias_por_categoria",
@@ -184,6 +211,9 @@ const perfilColorPrincipal = document.getElementById("perfilColorPrincipal");
 const perfilColorPrincipalLabel = document.getElementById(
   "perfilColorPrincipalLabel",
 );
+const perfilMenuColor = document.getElementById("perfilMenuColor");
+const perfilMenuColorLabel = document.getElementById("perfilMenuColorLabel");
+const perfilMenuTheme = document.getElementById("perfilMenuTheme");
 const perfilLogoBgMode = document.getElementById("perfilLogoBgMode");
 const perfilLogoBgColor = document.getElementById("perfilLogoBgColor");
 const perfilLogoBgOpacity = document.getElementById("perfilLogoBgOpacity");
@@ -499,6 +529,103 @@ function normalizeLogoBackgroundSettings(rawValue) {
 function getLogoBackgroundSettingsFromMetadata(menuMetadata) {
   const rawSettings = pickFirst(menuMetadata, MENU_LOGO_BACKGROUND_KEYS);
   return normalizeLogoBackgroundSettings(rawSettings);
+}
+
+function normalizeMenuTheme(value) {
+  const normalized = safeText(value).trim().toLowerCase();
+  if (
+    normalized === MENU_THEME_DARK ||
+    normalized === "oscuro" ||
+    normalized === "darkmode"
+  ) {
+    return MENU_THEME_DARK;
+  }
+  return MENU_THEME_LIGHT;
+}
+
+function normalizeMenuAppearanceSettings(
+  rawValue,
+  { fallbackColor = DEFAULT_PRIMARY_COLOR } = {},
+) {
+  let source = rawValue;
+  const rawText = safeText(rawValue).trim();
+  if (typeof rawValue === "string" && rawText) {
+    source = parseJsonObjectValue(rawValue);
+  }
+
+  const parsed =
+    source && typeof source === "object" && !Array.isArray(source) ? source : {};
+
+  const fallbackHex = normalizeHexColor(fallbackColor) || DEFAULT_PRIMARY_COLOR;
+  const menuColor =
+    normalizeHexColor(
+      pickFirst(parsed, MENU_APPEARANCE_MENU_COLOR_KEYS) ?? parsed.color_principal,
+    ) || fallbackHex;
+  const adminColor =
+    normalizeHexColor(pickFirst(parsed, MENU_APPEARANCE_ADMIN_COLOR_KEYS)) ||
+    menuColor ||
+    fallbackHex;
+
+  return {
+    adminColor,
+    menuColor,
+    menuTheme: normalizeMenuTheme(pickFirst(parsed, MENU_APPEARANCE_THEME_KEYS)),
+  };
+}
+
+function getMenuAppearanceSettingsFromMetadata(
+  menuMetadata,
+  { fallbackColor = DEFAULT_PRIMARY_COLOR } = {},
+) {
+  const rawAppearance = pickFirst(menuMetadata, MENU_APPEARANCE_KEYS);
+  if (rawAppearance) {
+    return normalizeMenuAppearanceSettings(rawAppearance, { fallbackColor });
+  }
+
+  return normalizeMenuAppearanceSettings(
+    {
+      admin_color: pickFirst(menuMetadata, MENU_APPEARANCE_ADMIN_COLOR_KEYS),
+      menu_color: pickFirst(menuMetadata, MENU_APPEARANCE_MENU_COLOR_KEYS),
+      menu_theme: pickFirst(menuMetadata, MENU_APPEARANCE_THEME_KEYS),
+    },
+    { fallbackColor },
+  );
+}
+
+function setMenuColorInForm(value) {
+  const normalized = normalizeHexColor(value) || DEFAULT_PRIMARY_COLOR;
+  if (perfilMenuColor) perfilMenuColor.value = normalized.toLowerCase();
+  if (perfilMenuColorLabel) perfilMenuColorLabel.textContent = normalized;
+}
+
+function getCurrentMenuColor() {
+  return (
+    normalizeHexColor(perfilMenuColor?.value) ||
+    normalizeHexColor(DEFAULT_MENU_APPEARANCE_SETTINGS.menuColor) ||
+    DEFAULT_PRIMARY_COLOR
+  );
+}
+
+function getCurrentMenuTheme() {
+  return normalizeMenuTheme(perfilMenuTheme?.value);
+}
+
+function applyMenuAppearanceSettingsToForm(
+  settings,
+  { persistAdminColor = false } = {},
+) {
+  const normalized = normalizeMenuAppearanceSettings(settings);
+  applyAdminTheme(normalized.adminColor, { persist: persistAdminColor });
+  setMenuColorInForm(normalized.menuColor);
+  if (perfilMenuTheme) perfilMenuTheme.value = normalized.menuTheme;
+}
+
+function getMenuAppearanceSettingsFromForm() {
+  return normalizeMenuAppearanceSettings({
+    admin_color: getCurrentPrimaryColor(),
+    menu_color: getCurrentMenuColor(),
+    menu_theme: getCurrentMenuTheme(),
+  });
 }
 
 function updateLogoBackgroundOpacityLabel(value) {
@@ -1500,6 +1627,16 @@ perfilColorPrincipal?.addEventListener("input", (event) => {
   applyAdminTheme(event.target?.value);
 });
 
+perfilMenuColor?.addEventListener("input", (event) => {
+  setMenuColorInForm(event.target?.value);
+});
+
+perfilMenuTheme?.addEventListener("change", () => {
+  if (perfilMenuTheme) {
+    perfilMenuTheme.value = normalizeMenuTheme(perfilMenuTheme.value);
+  }
+});
+
 perfilLogoBgMode?.addEventListener("change", () => {
   syncLogoBackgroundControlsState();
 });
@@ -1516,6 +1653,7 @@ perfilLogoBgOpacity?.addEventListener("input", () => {
 });
 
 applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
+applyMenuAppearanceSettingsToForm(DEFAULT_MENU_APPEARANCE_SETTINGS);
 applyAdminTheme(activePrimaryColor, { persist: false });
 
 // ========== LOGIN ==========
@@ -1617,12 +1755,12 @@ async function cargarPerfil() {
     );
     setProfileMediaFromUrl("platoDefault", platoDefaultUrl);
 
-    const perfilPrimaryColor = pickFirst(data, PROFILE_PRIMARY_COLOR_KEYS);
-    if (perfilPrimaryColor) {
-      applyAdminTheme(perfilPrimaryColor, { persist: true });
-    } else {
-      markActiveSwatches(getCurrentPrimaryColor());
-    }
+    const legacyMenuColor = pickFirst(data, PROFILE_PRIMARY_COLOR_KEYS);
+    const menuAppearance = getMenuAppearanceSettingsFromMetadata(
+      profileMenuMetadataCache,
+      { fallbackColor: legacyMenuColor || DEFAULT_PRIMARY_COLOR },
+    );
+    applyMenuAppearanceSettingsToForm(menuAppearance, { persistAdminColor: true });
 
     applyLogoBackgroundSettingsToForm(
       getLogoBackgroundSettingsFromMetadata(profileMenuMetadataCache),
@@ -1632,6 +1770,14 @@ async function cargarPerfil() {
     SUBCATEGORIAS_POR_CATEGORIA = {};
     if (perfilWifiPin) perfilWifiPin.value = "";
     syncPerfilWifiPinToggle({ resetVisibility: true });
+    applyMenuAppearanceSettingsToForm(
+      {
+        admin_color: getCurrentPrimaryColor(),
+        menu_color: DEFAULT_PRIMARY_COLOR,
+        menu_theme: DEFAULT_MENU_THEME,
+      },
+      { persistAdminColor: false },
+    );
     applyLogoBackgroundSettingsToForm(DEFAULT_LOGO_BACKGROUND_SETTINGS);
   }
 }
@@ -1768,7 +1914,8 @@ profileImageGalleryRefresh?.addEventListener("click", () => {
 document.getElementById("guardarPerfilBtn").onclick = async () => {
   try {
     const currentUser = await requireUser();
-    const primaryColor = getCurrentPrimaryColor();
+    const menuAppearanceSettings = getMenuAppearanceSettingsFromForm();
+    const menuColor = normalizeHexColor(menuAppearanceSettings.menuColor);
     let portadaFinal = perfilPortadaUrl.value.trim();
     let logoFinal = perfilLogoUrl?.value.trim() || "";
     let platoDefaultFinal = perfilPlatoDefaultUrl?.value.trim() || "";
@@ -1791,6 +1938,10 @@ document.getElementById("guardarPerfilBtn").onclick = async () => {
     const nextProfileMenuMetadata = {
       ...profileMenuMetadataCache,
       logo_background: logoBackgroundSettings,
+      menu_appearance: menuAppearanceSettings,
+      admin_color: menuAppearanceSettings.adminColor,
+      menu_color: menuAppearanceSettings.menuColor,
+      menu_theme: menuAppearanceSettings.menuTheme,
     };
 
     const payload = {
@@ -1875,7 +2026,7 @@ document.getElementById("guardarPerfilBtn").onclick = async () => {
       };
 
       const colorPatches = PROFILE_PRIMARY_COLOR_KEYS.map((colorKey) => ({
-        [colorKey]: primaryColor || null,
+        [colorKey]: menuColor || null,
       }));
       const dishPatches = PROFILE_DISH_PLACEHOLDER_KEYS.map((dishKey) => ({
         [dishKey]: platoDefaultValue,

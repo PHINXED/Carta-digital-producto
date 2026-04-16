@@ -273,7 +273,7 @@
           <div>
             <h4>Apariencia del menu publico</h4>
             <p class="section-hint">
-              Color principal aplicado al admin y al menu publico.
+              Configura por separado admin, carta y modo visual de la carta.
             </p>
           </div>
         </div>
@@ -290,13 +290,35 @@
 
           <div class="appearance-grid">
             <div class="field appearance-grid__picker">
-              <label>Color del menu</label>
+              <label>Color del admin</label>
               <div class="color-picker-row">
                 <input id="perfilColorPrincipal" type="color" value="#ffe800" />
                 <span id="perfilColorPrincipalLabel">#FFE800</span>
               </div>
               <small class="hint">
-                Selecciona directamente el color exacto que quieres aplicar.
+                Este color solo se aplica al panel de administracion.
+              </small>
+            </div>
+
+            <div class="field appearance-grid__picker">
+              <label>Color de la carta</label>
+              <div class="color-picker-row">
+                <input id="perfilMenuColor" type="color" value="#ffe800" />
+                <span id="perfilMenuColorLabel">#FFE800</span>
+              </div>
+              <small class="hint">
+                Es el color de acento que vera el cliente en la carta publica.
+              </small>
+            </div>
+
+            <div class="field appearance-grid__picker">
+              <label for="perfilMenuTheme">Tema de la carta</label>
+              <select id="perfilMenuTheme">
+                <option value="light">Claro</option>
+                <option value="dark">Oscuro</option>
+              </select>
+              <small class="hint">
+                Cambia el estilo base de fondo y superficies de la carta.
               </small>
             </div>
 

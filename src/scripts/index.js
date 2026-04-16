@@ -155,10 +155,31 @@ const PROFILE_MENU_METADATA_KEYS = ["personalizacion_menu"];
 const MENU_LOGO_BACKGROUND_KEYS = ["logo_background", "logo_bg", "fondo_logo"];
 const LOGO_BACKGROUND_MODE_SOLID = "solid";
 const LOGO_BACKGROUND_MODE_TRANSPARENT = "transparent";
+const MENU_THEME_LIGHT = "light";
+const MENU_THEME_DARK = "dark";
+const DEFAULT_MENU_THEME = MENU_THEME_LIGHT;
+const MENU_APPEARANCE_KEYS = ["menu_appearance", "appearance", "apariencia_menu"];
+const MENU_APPEARANCE_MENU_COLOR_KEYS = [
+  "menu_color",
+  "color_menu",
+  "public_color",
+  "color_publico",
+  "menuColor",
+];
+const MENU_APPEARANCE_THEME_KEYS = [
+  "menu_theme",
+  "theme",
+  "tema",
+  "menuTheme",
+];
 const DEFAULT_LOGO_BACKGROUND_SETTINGS = Object.freeze({
   mode: LOGO_BACKGROUND_MODE_SOLID,
   color: "#FFFFFF",
   opacity: 82,
+});
+const DEFAULT_MENU_APPEARANCE_SETTINGS = Object.freeze({
+  menuColor: DEFAULT_PRIMARY_COLOR,
+  menuTheme: DEFAULT_MENU_THEME,
 });
 const DISH_IMAGE_KEYS = ["imagen_url", "image_url", "foto_url", "img_url"];
 const DISH_MULTI_CATEGORY_KEYS = [
@@ -618,6 +639,61 @@ function getProfileLogoBackgroundSettings(profileData) {
   return normalizeLogoBackgroundSettings(rawSettings);
 }
 
+function normalizeMenuTheme(value) {
+  const normalized = safeText(value).trim().toLowerCase();
+  if (
+    normalized === MENU_THEME_DARK ||
+    normalized === "oscuro" ||
+    normalized === "darkmode"
+  ) {
+    return MENU_THEME_DARK;
+  }
+  return MENU_THEME_LIGHT;
+}
+
+function normalizeMenuAppearanceSettings(
+  rawValue,
+  { fallbackColor = DEFAULT_PRIMARY_COLOR } = {},
+) {
+  let source = rawValue;
+  const rawText = safeText(rawValue).trim();
+  if (typeof rawValue === "string" && rawText) {
+    source = parseJsonObjectValue(rawValue);
+  }
+
+  const parsed =
+    source && typeof source === "object" && !Array.isArray(source) ? source : {};
+
+  return {
+    menuColor:
+      normalizeHexColor(
+        pick(parsed, MENU_APPEARANCE_MENU_COLOR_KEYS) ?? parsed.color_principal,
+      ) ||
+      normalizeHexColor(fallbackColor) ||
+      DEFAULT_PRIMARY_COLOR,
+    menuTheme: normalizeMenuTheme(pick(parsed, MENU_APPEARANCE_THEME_KEYS)),
+  };
+}
+
+function getProfileMenuAppearance(profileData) {
+  const metadata = getProfileMenuMetadata(profileData);
+  const fallbackColor =
+    pick(profileData, PROFILE_PRIMARY_COLOR_KEYS) || DEFAULT_PRIMARY_COLOR;
+  const rawAppearance = pick(metadata, MENU_APPEARANCE_KEYS);
+
+  if (rawAppearance) {
+    return normalizeMenuAppearanceSettings(rawAppearance, { fallbackColor });
+  }
+
+  return normalizeMenuAppearanceSettings(
+    {
+      menu_color: pick(metadata, MENU_APPEARANCE_MENU_COLOR_KEYS),
+      menu_theme: pick(metadata, MENU_APPEARANCE_THEME_KEYS),
+    },
+    { fallbackColor },
+  );
+}
+
 function getProfileDishPlaceholderUrl() {
   return normalizeOptionalUrl(pick(PROFILE, PROFILE_DISH_PLACEHOLDER_KEYS));
 }
@@ -758,50 +834,92 @@ function bestTextColor(backgroundHex) {
   return darkContrast >= lightContrast ? "#121212" : "#FFFFFF";
 }
 
-function applyPublicTheme(primaryColor) {
+function applyPublicTheme(primaryColor, { menuTheme = DEFAULT_MENU_THEME } = {}) {
+  const mode = normalizeMenuTheme(menuTheme);
+  const isDark = mode === MENU_THEME_DARK;
   const accent = normalizeHexColor(primaryColor) || DEFAULT_PRIMARY_COLOR;
-  const accentOnLight = ensureContrast(accent, "#FFFFFF", 2.2);
+  const accentAgainst = isDark ? "#121212" : "#FFFFFF";
+  const accentOnSurface = ensureContrast(accent, accentAgainst, isDark ? 3.2 : 2.2);
   const accentOnDark = ensureContrast(accent, "#1F1F1F", 3.2);
-  const accentInk = bestTextColor(accentOnLight);
-  const cfg = {
-    frameWidth: "2px",
-    frameAlpha: 0.34,
-    frameShadow: 0.12,
-    frameRingWidth: "2px",
-    frameRingAlpha: 0.08,
-    iconBg: 0.14,
-    iconBorder: 0.24,
-  };
+  const accentInk = bestTextColor(accentOnSurface);
+
+  const cfg = isDark
+    ? {
+        frameWidth: "2px",
+        frameAlpha: 0.45,
+        frameShadow: 0.34,
+        frameRingWidth: "2px",
+        frameRingAlpha: 0.16,
+        iconBg: 0.2,
+        iconBorder: 0.34,
+      }
+    : {
+        frameWidth: "2px",
+        frameAlpha: 0.34,
+        frameShadow: 0.12,
+        frameRingWidth: "2px",
+        frameRingAlpha: 0.08,
+        iconBg: 0.14,
+        iconBorder: 0.24,
+      };
+
+  const palette = isDark
+    ? {
+        "--bg": "#0f1012",
+        "--bg-soft-1": "rgba(255,255,255,.045)",
+        "--bg-soft-2": "rgba(255,255,255,.025)",
+        "--card": "#15171b",
+        "--surface": "#1b1e24",
+        "--surface-soft": "#232731",
+        "--surface-press": "#2a2f3b",
+        "--text": "#f4f6fb",
+        "--muted": "#a9afbf",
+        "--line": "#303745",
+        "--chip": "#262c38",
+        "--cover-gradient": "linear-gradient(135deg,#1b1f28,#2d3442)",
+      }
+    : {
+        "--bg": "#efeff2",
+        "--bg-soft-1": "rgba(31,31,31,.05)",
+        "--bg-soft-2": "rgba(31,31,31,.03)",
+        "--card": "#ffffff",
+        "--surface": "#ffffff",
+        "--surface-soft": "#fafafb",
+        "--surface-press": "#f2f2f5",
+        "--text": "#121212",
+        "--muted": "#6b6b6b",
+        "--line": "#e6e6e9",
+        "--chip": "#f3f3f5",
+        "--cover-gradient": "linear-gradient(135deg,#d7d7dd,#f5f5f7)",
+      };
+
   const theme = {
-    "--bg": "#efeff2",
-    "--bg-soft-1": "rgba(31,31,31,.05)",
-    "--bg-soft-2": "rgba(31,31,31,.03)",
-    "--card": "#ffffff",
-    "--surface": "#ffffff",
-    "--surface-soft": "#fafafb",
-    "--surface-press": "#f2f2f5",
-    "--line": "#e6e6e9",
-    "--chip": "#f3f3f5",
-    "--chipActive": accentOnLight,
-    "--chipActiveText": bestTextColor(accentOnLight),
-    "--accent": accentOnLight,
-    "--accent-strong": mixHex(accentOnLight, "#FFFFFF", 0.18),
+    ...palette,
+    "--chipActive": accentOnSurface,
+    "--chipActiveText": bestTextColor(accentOnSurface),
+    "--accent": accentOnSurface,
+    "--accent-strong": mixHex(
+      accentOnSurface,
+      isDark ? "#FFFFFF" : "#FFFFFF",
+      isDark ? 0.22 : 0.18,
+    ),
     "--accent-ink": accentInk,
-    "--accent-on-light": accentOnLight,
+    "--accent-on-light": accentOnSurface,
     "--accent-on-dark": accentOnDark,
-    "--accent-soft": toRgba(accentOnLight, cfg.iconBg),
-    "--accent-shadow": toRgba(accentOnDark, 0.24),
+    "--accent-soft": toRgba(accentOnSurface, cfg.iconBg),
+    "--accent-shadow": toRgba(accentOnDark, isDark ? 0.3 : 0.24),
     "--frame-width": cfg.frameWidth,
-    "--frame-border": toRgba(accentOnLight, cfg.frameAlpha),
-    "--frame-shadow": toRgba(accentOnLight, cfg.frameShadow),
+    "--frame-border": toRgba(accentOnSurface, cfg.frameAlpha),
+    "--frame-shadow": toRgba(accentOnSurface, cfg.frameShadow),
     "--frame-ring-width": cfg.frameRingWidth,
-    "--frame-ring": toRgba(accentOnLight, cfg.frameRingAlpha),
-    "--home-icon-bg": toRgba(accentOnLight, cfg.iconBg),
-    "--home-icon-color": accentOnLight,
-    "--home-icon-border": toRgba(accentOnLight, cfg.iconBorder),
-    "--cover-gradient": "linear-gradient(135deg,#d7d7dd,#f5f5f7)",
+    "--frame-ring": toRgba(accentOnSurface, cfg.frameRingAlpha),
+    "--home-icon-bg": toRgba(accentOnSurface, cfg.iconBg),
+    "--home-icon-color": accentOnSurface,
+    "--home-icon-border": toRgba(accentOnSurface, cfg.iconBorder),
   };
+
   const root = document.documentElement;
+  root.setAttribute("data-menu-theme", mode);
   for (const [key, value] of Object.entries(theme)) {
     root.style.setProperty(key, value);
   }
@@ -1956,7 +2074,7 @@ async function loadMenusIfExists() {
 
 function applyProfileToHome() {
   if (!PROFILE) {
-    applyPublicTheme(DEFAULT_PRIMARY_COLOR);
+    applyPublicTheme(DEFAULT_PRIMARY_COLOR, { menuTheme: DEFAULT_MENU_THEME });
     applyCoverLogoBackground(DEFAULT_LOGO_BACKGROUND_SETTINGS);
     // Fallback: si no hay portada, ponemos un degradado para no quedar feo
     coverImg.style.display = "none";
@@ -1966,9 +2084,10 @@ function applyProfileToHome() {
     return;
   }
 
-  applyPublicTheme(
-    pick(PROFILE, PROFILE_PRIMARY_COLOR_KEYS) || DEFAULT_PRIMARY_COLOR,
-  );
+  const menuAppearance = getProfileMenuAppearance(PROFILE);
+  applyPublicTheme(menuAppearance.menuColor, {
+    menuTheme: menuAppearance.menuTheme,
+  });
   applyCoverLogoBackground(getProfileLogoBackgroundSettings(PROFILE));
 
   const name = pick(PROFILE, [
@@ -2402,7 +2521,9 @@ document.addEventListener("keydown", (e) => {
 // =============================
 // Init
 // =============================
-applyPublicTheme(DEFAULT_PRIMARY_COLOR);
+applyPublicTheme(DEFAULT_MENU_APPEARANCE_SETTINGS.menuColor, {
+  menuTheme: DEFAULT_MENU_APPEARANCE_SETTINGS.menuTheme,
+});
 initLang();
 loadMenu();
 

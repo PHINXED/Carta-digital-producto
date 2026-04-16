@@ -188,7 +188,8 @@ button:active,
     gap: 12px;
 }
 
-#perfilColorPrincipal {
+#perfilColorPrincipal,
+#perfilMenuColor {
     width: 56px;
     height: 38px;
     border: 0;
@@ -197,21 +198,25 @@ button:active,
     cursor: pointer;
 }
 
-#perfilColorPrincipal::-webkit-color-swatch-wrapper {
+#perfilColorPrincipal::-webkit-color-swatch-wrapper,
+#perfilMenuColor::-webkit-color-swatch-wrapper {
     padding: 0;
 }
 
-#perfilColorPrincipal::-webkit-color-swatch {
+#perfilColorPrincipal::-webkit-color-swatch,
+#perfilMenuColor::-webkit-color-swatch {
     border: 1px solid var(--border);
     border-radius: 10px;
 }
 
-#perfilColorPrincipal::-moz-color-swatch {
+#perfilColorPrincipal::-moz-color-swatch,
+#perfilMenuColor::-moz-color-swatch {
     border: 1px solid var(--border);
     border-radius: 10px;
 }
 
-#perfilColorPrincipalLabel {
+#perfilColorPrincipalLabel,
+#perfilMenuColorLabel {
     min-width: 76px;
     font-size: 12px;
     letter-spacing: 0.06em;
