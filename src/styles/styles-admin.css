@@ -709,8 +709,21 @@ h1 svg {
     display: none;
 }
 .tab-content.active {
+    position: relative;
     display: block;
     animation: fadeUp 0.18s ease;
+}
+
+.tab-content.active::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    pointer-events: none;
+    z-index: 2;
+    background: linear-gradient(90deg, var(--accent-soft), rgba(0, 0, 0, 0));
 }
 
 @keyframes fadeUp {
@@ -1714,19 +1727,13 @@ h1 svg {
 .admin-tab-stack::before {
     content: "";
     position: absolute;
-    top: -10px;
-    left: -8px;
-    right: auto;
-    width: min(420px, 46vw);
+    top: -6px;
+    left: 0;
+    right: 0;
     height: 120px;
     pointer-events: none;
-    background: radial-gradient(
-        130% 130% at 0% 0%,
-        var(--accent-soft-alt) 0%,
-        rgba(0, 0, 0, 0) 72%
-    );
+    background: linear-gradient(180deg, var(--accent-soft-alt), transparent 75%);
     border-radius: 18px;
-    opacity: 0.9;
     z-index: 0;
 }
 
