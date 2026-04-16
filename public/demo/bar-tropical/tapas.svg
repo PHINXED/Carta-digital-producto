@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="70" y1="90" x2="1100" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2E180E"/>
+      <stop offset=".5" stop-color="#7A3B17"/>
+      <stop offset="1" stop-color="#D89143"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect x="140" y="210" width="920" height="510" rx="42" fill="#7B4B25"/>
+  <rect x="180" y="250" width="840" height="430" rx="34" fill="#AB6B36"/>
+  <circle cx="360" cy="420" r="92" fill="#F7C46D"/>
+  <circle cx="360" cy="420" r="54" fill="#C64E2A"/>
+  <circle cx="600" cy="420" r="92" fill="#F4E9D1"/>
+  <circle cx="600" cy="420" r="54" fill="#E0A03B"/>
+  <circle cx="840" cy="420" r="92" fill="#E8D4A2"/>
+  <circle cx="840" cy="420" r="54" fill="#7B3F1B"/>
+  <path d="M290 572C328 536 394 528 444 556C418 608 366 646 306 644C286 622 280 596 290 572Z" fill="#2E8B57"/>
+  <path d="M530 568C580 534 650 528 706 562C676 616 622 652 556 648C532 626 522 596 530 568Z" fill="#2E8B57"/>
+  <path d="M770 572C820 538 888 534 944 566C912 618 860 650 796 646C774 624 764 596 770 572Z" fill="#2E8B57"/>
+</svg>

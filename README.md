@@ -1,396 +1,90 @@
-# 🍽️ iMenu
+# iMenu
 
-Carta digital para bares y restaurantes, con **panel de administración**, **vista pública** y **backend seguro en Supabase**.
+Carta digital para bares y restaurantes con panel de administracion en Astro y backend en Supabase.
 
-Este README es la **fuente de verdad del proyecto**: explica cómo funciona todo (frontend, base de datos, seguridad, RLS, vistas y RPCs) para que cualquiera pueda continuar el desarrollo sin romper nada.
+El estado actual del proyecto ya no coincide con la documentacion antigua basada en `iMenu`. La configuracion real de trabajo en este repo gira alrededor de:
 
----
+- Schema principal: `CartaDigitalLM`
+- Frontend publico: [src/scripts/index.js](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/src/scripts/index.js>)
+- Frontend admin: [src/scripts/admin.js](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/src/scripts/admin.js>)
+- Demo visual y seed: [public/demo/bar-tropical](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/public/demo/bar-tropical>) y [supabase/bar-tropical-template.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/bar-tropical-template.sql>)
+- Guia de backend actualizada: [supabase/README.md](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/README.md>)
+- SQL de setup y permisos: [supabase/setup-carta-digital.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/setup-carta-digital.sql>)
 
-## 🚀 Visión general
+## Estructura
 
-iMenu permite a un bar/restaurante:
+- `src/pages` contiene las entradas Astro.
+- `src/scripts/index.js` carga la carta publica.
+- `src/scripts/admin.js` gestiona login, perfil, categorias, platos y storage.
+- `public/alergenos` contiene los SVG de alergenos que consume la carta.
+- `public/demo/bar-tropical` contiene la portada y las imagenes demo para poblar una carta de ejemplo.
+- `supabase` contiene documentacion y SQL operativo para backend.
 
-- Mostrar su carta online mediante URL / QR
-- Gestionar categorías y platos desde un panel privado
-- Mostrar información del local (dirección, teléfono, reseñas)
-- Compartir el WiFi **protegido por PIN**
+## Comportamiento actual
 
-Arquitectura:
+### Vista publica
 
-```
-Cliente (móvil)
-   │
-   │  index.html / index.js (vista pública)
-   ▼
-Supabase (API)
-   │
-   ├─ Auth
-   ├─ PostgreSQL (schema iMenu)
-   ├─ RLS + Policies
-   ├─ Vistas públicas
-   └─ RPCs seguros
-   ▲
-   │  admin.html / admin.js (panel privado)
-   │
-Dueño del local
-```
+La carta:
 
----
+- acepta `?cliente=<uuid>` o `?cliente=<slug>`
+- consulta `CartaDigitalLM.Categorias` y `CartaDigitalLM.Menu`
+- usa `CartaDigitalLM.Perfil_publico` para resolver `slug` y cargar branding publico
+- usa `public.imenu_get_wifi_by_user(uuid, text)` para revelar la clave WiFi por PIN
+- resuelve iconos de alergenos desde `/alergenos`
 
-## 📂 Frontend
+### Admin
 
-### 🌍 Vista pública (Carta)
+El panel:
 
-**Archivos**:
-- `index.html`
-- `index.js`
+- inicia sesion con Supabase Auth
+- lee y escribe `CartaDigitalLM.Perfil`
+- hace CRUD sobre `CartaDigitalLM.Categorias`
+- hace CRUD sobre `CartaDigitalLM.Menu`
+- sube imagenes al bucket `imenu`
 
-Funcionalidad:
-- Carga carta por `slug` (`?cliente=icreate`)
-- Muestra portada, nombre, info y reseñas
-- Lista categorías y platos activos
-- Muestra nombre del WiFi
-- Solicita PIN para revelar la contraseña
+Si el admin muestra `permission denied for table Perfil`, el problema no esta en el frontend: faltan `GRANT` o policies RLS del owner sobre `CartaDigitalLM.Perfil`. El SQL para dejarlo bien esta en [supabase/setup-carta-digital.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/setup-carta-digital.sql>).
 
-Características:
-- ❌ No requiere login
-- 🔐 Nunca accede a datos sensibles directamente
-- 📖 Solo lectura
+## Arranque local
 
----
-
-### 🔐 Panel de administración
-
-**Archivos**:
-- `admin.html`
-- `admin.js`
-
-Funcionalidad:
-- Login con Supabase Auth
-- Edición del perfil del local
-- Configuración de WiFi y PIN
-- CRUD de categorías
-- CRUD de platos
-- Ordenación
-
-Características:
-- 🔑 Requiere sesión (`authenticated`)
-- 👤 Solo gestiona sus propios datos
-
----
-
-## 🗄️ Base de datos (Supabase)
-
-### 📦 Schema
-
-Todo el proyecto vive en un schema dedicado:
-
-```
-iMenu
+```bash
+pnpm install
+pnpm run dev
 ```
 
-Se conceden permisos explícitos:
+Build:
 
-```sql
-grant usage on schema "iMenu" to anon, authenticated;
+```bash
+pnpm run build
 ```
 
----
+## GitHub Pages
 
-## 📄 Tablas
+El deploy se hace con GitHub Actions desde `.github/workflows/deploy.yml`.
 
-### 🧑‍🍳 iMenu.Perfil
+Puntos importantes:
 
-Datos del local.
+- los assets en `public/` se publican tal cual en Pages
+- el seed demo referencia rutas relativas como `demo/bar-tropical/cover.svg`
+- para que esas imagenes se vean en produccion, los cambios del repo tienen que estar publicados en `main`
 
-Campos clave:
-- `user_id` (owner)
-- `nombre`
-- `slug`
-- `color_principal` (hex, ej. `#FFE800`)
-- `intensidad_tema` (`suave` | `medio` | `vivo`)
-- `wifi_name`
-- `wifi_pass` ❗ privado
-- `wifi_pin_hash` ❗ privado
+## Plantilla demo
 
-🔒 **Nunca se expone directamente al público**.
+Se ha preparado una plantilla amplia para el perfil `88b4b1c8-f270-4f75-90dc-0d5f7c9a0d91`:
 
----
+- 8 categorias
+- 40 platos
+- portada y artes demo
+- alergenos usando las keys reales de `/alergenos`
 
-### 📂 iMenu.Categorias
+Pasos:
 
-- `id`
-- `nombre`
-- `orden`
-- `activa`
-- `user_id`
+1. Ejecuta [supabase/setup-carta-digital.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/setup-carta-digital.sql>) en Supabase si aun no has dejado permisos, vista publica y RPCs listos.
+2. Ejecuta [supabase/bar-tropical-template.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/bar-tropical-template.sql>) para poblar la carta demo.
+3. Publica los cambios del repo para que `public/demo/bar-tropical` exista en GitHub Pages.
 
----
+## Notas operativas
 
-### 🍽️ iMenu.Menu
-
-- `id`
-- `nombre`
-- `descripcion`
-- `precio`
-- `categoria_id`
-- `orden`
-- `activo`
-- `user_id`
-
----
-
-## 👀 Vista pública
-
-### iMenu.Perfil_publico
-
-Vista SQL que expone **solo datos seguros** del perfil:
-
-Incluye:
-- nombre
-- portada
-- teléfono
-- dirección
-- rating
-- color_principal
-- intensidad_tema
-- wifi_name
-
-❌ Excluye:
-- wifi_pass
-- wifi_pin_hash
-
-Permisos:
-
-```sql
-grant select on "iMenu"."Perfil_publico" to anon, authenticated;
-```
-
-La carta pública **solo consulta esta vista**.
-
----
-
-## 🧩 Mantenimiento: reseñas y vista pública
-
-Si se quiere **eliminar el contador de reseñas** y reconstruir la vista pública:
-
-1) Añadir columna de branding (si no existe):
-
-```sql
-alter table "iMenu"."Perfil"
-add column if not exists color_principal text;
-
-alter table "iMenu"."Perfil"
-add column if not exists intensidad_tema text;
-```
-
-2) Quitar la columna de la tabla `iMenu.Perfil`:
-
-```sql
-alter table "iMenu"."Perfil" drop column if exists rating_count;
-```
-
-3) Recrear la vista pública sin esa columna y con color principal:
-
-```sql
-create or replace view "iMenu"."Perfil_publico" as
-select
-  user_id,
-  nombre,
-  portada_url,
-  telefono,
-  direccion,
-  reviews_url,
-  slug,
-  google_place_id,
-  color_principal,
-  intensidad_tema,
-  wifi_name
-from "iMenu"."Perfil";
-```
-
-4) Reaplicar permisos:
-
-```sql
-grant select on "iMenu"."Perfil_publico" to anon, authenticated;
-```
-
----
-
-## 🧰 Storage (Subida de imágenes)
-
-Para que la subida de imágenes funcione en el bucket `imenu`, primero se deben otorgar permisos básicos:
-
-```sql
-grant usage on schema storage to authenticated;
-grant all on table storage.objects to authenticated;
-grant all on table storage.buckets to authenticated;
-```
-
-Luego, crea las policies seguras (solo permite subir/editar/borrar en la carpeta del usuario):
-
-```sql
-create policy "imenu_user_insert"
-on storage.objects
-for insert
-to authenticated
-with check (
-  bucket_id = 'imenu'
-  and name like auth.uid() || '/%'
-);
-
-create policy "imenu_user_update"
-on storage.objects
-for update
-to authenticated
-using (
-  bucket_id = 'imenu'
-  and name like auth.uid() || '/%'
-)
-with check (
-  bucket_id = 'imenu'
-  and name like auth.uid() || '/%'
-);
-
-create policy "imenu_user_delete"
-on storage.objects
-for delete
-to authenticated
-using (
-  bucket_id = 'imenu'
-  and name like auth.uid() || '/%'
-);
-```
-
-### 🧪 Modo temporal (debug)
-
-Si las policies estrictas fallan y necesitas desbloquear la subida **temporalmente**, puedes usar una policy abierta para `authenticated`:
-
-```sql
-grant usage on schema storage to authenticated;
-grant all on table storage.objects to authenticated;
-grant all on table storage.buckets to authenticated;
-
-drop policy if exists "imenu_user_insert" on storage.objects;
-drop policy if exists "imenu_user_update" on storage.objects;
-drop policy if exists "imenu_user_delete" on storage.objects;
-drop policy if exists "imenu_user_insert_debug" on storage.objects;
-
-create policy "imenu_allow_all_authenticated"
-on storage.objects
-for all
-to authenticated
-using (true)
-with check (true);
-```
-
-> ⚠️ Este modo **no es seguro** a largo plazo porque cualquier usuario autenticado puede modificar archivos del bucket. Úsalo solo para desbloquear y luego vuelve a la policy estricta.
-
----
-
-## 🔐 Seguridad (RLS + Policies)
-
-### Categorias
-
-```sql
-alter table "iMenu"."Categorias" enable row level security;
-```
-
-- `anon`: SELECT solo si `activa = true`
-- `authenticated`: SELECT / INSERT / UPDATE / DELETE solo si `user_id = auth.uid()`
-
----
-
-### Menu
-
-```sql
-alter table "iMenu"."Menu" enable row level security;
-```
-
-- `anon`: SELECT solo si `activo = true`
-- `authenticated`: CRUD solo del owner
-
----
-
-### Perfil
-
-```sql
-alter table "iMenu"."Perfil" enable row level security;
-```
-
-- ❌ Sin SELECT público
-- ✅ Owner puede hacer ALL
-
----
-
-## 🔑 WiFi con PIN
-
-### Objetivo
-
-Mostrar la contraseña del WiFi **solo a quien tenga el PIN**.
-
-### Flujo
-
-1. Admin define WiFi y PIN
-2. El PIN se guarda hasheado (`pgcrypto`)
-3. La carta solicita el PIN
-4. Un RPC valida el PIN
-5. Si es correcto → devuelve `wifi_pass`
-
----
-
-## 🔧 RPCs
-
-### Guardar PIN (admin)
-
-```sql
-public.imenu_set_wifi_pin(p_pin text)
-```
-
-- Guarda hash del PIN
-- Solo `authenticated`
-
----
-
-### Validar PIN (público)
-
-```sql
-public.imenu_get_wifi_by_user(p_user_id uuid, p_pin text)
-```
-
-- Público
-- Devuelve WiFi solo si el PIN es correcto
-
----
-
-## 🧠 Prompt maestro (continuar desarrollo)
-
-```
-Estás ayudándome a desarrollar iMenu, una carta digital tipo SaaS.
-
-Arquitectura:
-- Frontend: HTML/CSS/JS estático
-- Backend: Supabase
-- Schema: iMenu
-- Tablas: Perfil, Categorias, Menu
-- Vista: Perfil_publico
-- Seguridad: RLS + policies estrictas
-- WiFi protegido por PIN hasheado (pgcrypto)
-- RPCs: imenu_set_wifi_pin, imenu_get_wifi_by_user
-
-Requisitos:
-- No romper RLS
-- No exponer datos sensibles
-- Mantener separación vista pública / admin
-
-Dame siempre SQL exacto, cambios en JS y explicación clara.
-```
-
----
-
-## ✅ Estado del proyecto
-
-- Sistema estable
-- Seguridad correcta
-- Escalable
-- Listo para producción y crecimiento
+- La carta publica necesita que `CartaDigitalLM` este incluido en `Settings > API > Exposed schemas`.
+- Los RPCs de WiFi viven en `public`, no en `CartaDigitalLM`.
+- El seed demo asume que `Menu.alergenos` acepta arrays tipo `text[]`. Si esa columna fuera `json` o `jsonb`, el seed debe ajustarse.
+- La guia detallada de backend y troubleshooting esta en [supabase/README.md](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/README.md>).
