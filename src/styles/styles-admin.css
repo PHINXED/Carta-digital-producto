@@ -6,6 +6,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scrollbar-gutter: stable;
+}
+
 :root {
     --bg: #0a0a0a;
     --panel: #151515;
@@ -1701,9 +1705,28 @@ h1 svg {
 }
 
 .admin-tab-stack {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.admin-tab-stack::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 0;
+    right: 0;
+    height: 120px;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--accent-soft-alt), transparent 75%);
+    border-radius: 18px;
+    z-index: 0;
+}
+
+.admin-tab-stack > .tab-content {
+    position: relative;
+    z-index: 1;
 }
 
 .admin-tabs {
@@ -1772,6 +1795,15 @@ h1 svg {
 .admin-page__sidebar,
 .admin-page__main {
     min-width: 0;
+}
+
+.admin-page__sidebar--ghost {
+    pointer-events: none;
+}
+
+.admin-page__sidebar--ghost > .form-box {
+    visibility: hidden;
+    min-height: 1px;
 }
 
 .admin-page .form-box,
@@ -2969,6 +3001,10 @@ h1 svg {
 
     .admin-sticky-card {
         position: static;
+    }
+
+    .admin-page__sidebar--ghost {
+        display: none;
     }
 }
 
