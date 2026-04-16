@@ -2470,6 +2470,160 @@ h1 svg {
     max-width: min(980px, calc(100vw - 24px));
 }
 
+.imodal-card--menu-editor .field,
+.imodal-card--menu-picker .field {
+    gap: 8px;
+}
+
+.imodal-card--menu-editor .field > span,
+.imodal-card--menu-picker .field > span,
+.imodal-card--menu-editor .field > label,
+.imodal-card--menu-picker .field > label,
+.imodal-card--menu-editor label,
+.imodal-card--menu-picker label {
+    color: #e6e6e6;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.imodal-card--menu-editor input:not([type="checkbox"]),
+.imodal-card--menu-editor select,
+.imodal-card--menu-picker input:not([type="checkbox"]),
+.imodal-card--menu-picker select {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 14px;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 26%),
+        var(--panel-3);
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.imodal-card--menu-editor input::placeholder,
+.imodal-card--menu-picker input::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.imodal-card--menu-editor input:not([type="checkbox"]):focus,
+.imodal-card--menu-editor select:focus,
+.imodal-card--menu-picker input:not([type="checkbox"]):focus,
+.imodal-card--menu-picker select:focus {
+    outline: none;
+    border-color: var(--accent-ui);
+    box-shadow:
+        0 0 0 3px var(--accent-soft),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.imodal-card--menu-editor button:not(.imodal-close):not(.imodal-backdrop),
+.imodal-card--menu-picker button:not(.imodal-close):not(.imodal-backdrop) {
+    min-height: 42px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        background 0.12s ease,
+        color 0.12s ease,
+        border-color 0.12s ease,
+        opacity 0.12s ease;
+}
+
+.imodal-card--menu-editor button:not(.imodal-close):not(.imodal-backdrop):hover,
+.imodal-card--menu-picker button:not(.imodal-close):not(.imodal-backdrop):hover {
+    transform: translateY(-1px);
+}
+
+.imodal-card--menu-editor .secondaryBtn,
+.imodal-card--menu-picker .secondaryBtn,
+.imodal-card--menu-editor .cancel {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.imodal-card--menu-editor .secondaryBtn:hover,
+.imodal-card--menu-picker .secondaryBtn:hover,
+.imodal-card--menu-editor .cancel:hover {
+    background: var(--accent-soft-alt);
+    color: var(--accent-ui);
+    border-color: var(--accent-ui);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+}
+
+.imodal-card--menu-editor #menuEditorSaveBtn,
+.imodal-card--menu-editor .btn-editar {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent-ui);
+    box-shadow: 0 10px 20px var(--accent-shadow);
+}
+
+.imodal-card--menu-editor #menuEditorSaveBtn:hover,
+.imodal-card--menu-editor .btn-editar:hover {
+    background: var(--accent-strong);
+    color: var(--accent-ink);
+}
+
+.imodal-card--menu-editor .btn-eliminar {
+    background: rgba(197, 57, 57, 0.14);
+    color: #ffd0d0;
+    border-color: #ef6262;
+}
+
+.imodal-card--menu-editor .btn-eliminar:hover {
+    background: rgba(197, 57, 57, 0.22);
+    color: #fff0f0;
+    box-shadow: 0 10px 20px rgba(197, 57, 57, 0.18);
+}
+
+.imodal-card--menu-editor .btn-eliminar[disabled],
+.imodal-card--menu-picker .btn-eliminar[disabled],
+.imodal-card--menu-editor .secondaryBtn[disabled],
+.imodal-card--menu-picker .secondaryBtn[disabled],
+.imodal-card--menu-editor .btn-editar[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.imodal-card--menu-editor .menu-editor-actions button,
+.imodal-card--menu-picker .menu-editor-actions button {
+    min-width: 132px;
+}
+
+.imodal-card--menu-editor .menu-editor-field-top .btn-editar,
+.imodal-card--menu-editor .menu-editor-field-top .btn-eliminar {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.imodal-card--menu-editor .menu-selected-dish-price-field input {
+    min-height: 40px;
+    padding: 9px 12px;
+}
+
+.imodal-card--menu-editor .menu-check {
+    min-height: 24px;
+}
+
+.imodal-card--menu-editor .menu-check input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent-ui);
+}
+
 .menu-editor-layout {
     display: flex;
     flex-direction: column;
