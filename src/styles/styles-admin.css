@@ -2468,6 +2468,10 @@ h1 svg {
 .imodal-card--menu-editor,
 .imodal-card--menu-picker {
     max-width: min(980px, calc(100vw - 24px));
+    max-height: calc(100dvh - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .imodal-card--menu-editor .field,
@@ -2629,6 +2633,10 @@ h1 svg {
     flex-direction: column;
     gap: 16px;
     margin-top: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding-right: 4px;
 }
 
 .menu-editor-topbar {
@@ -2795,6 +2803,7 @@ h1 svg {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 18px;
+    flex: 0 0 auto;
 }
 
 .menu-picker-toolbar {

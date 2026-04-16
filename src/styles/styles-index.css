@@ -545,7 +545,7 @@ button:active,
 .sheetCard{
   position:absolute; left:50%; transform:translateX(-50%);
   bottom:0;
-  width:min(430px, 100%);
+  width:min(430px, calc(100vw - 14px));
   background:var(--card);
   border-radius:22px 22px 0 0;
   overflow:hidden;
@@ -581,9 +581,12 @@ button:active,
 .sheetImage img{width:100%; height:100%; object-fit:contain; display:block; background:var(--chip)}
 .sheetBody{
   padding:16px 18px calc(22px + env(safe-area-inset-bottom));
+  flex:1 1 auto;
   overflow-y:auto;
   overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  scrollbar-gutter:stable;
   min-height:0;
 }
 .sheetTitle{font-size:22px; font-weight:900; margin:2px 0 6px}
@@ -711,55 +714,105 @@ button:active,
 }
 
 .menuSheetField {
-  border:1px solid var(--line);
+  border:var(--frame-width) solid var(--frame-border);
   border-radius:18px;
   overflow:hidden;
-  background:var(--surface);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88)),
+    var(--surface);
+  box-shadow:
+    0 0 0 calc(var(--frame-ring-width) * .5) var(--frame-ring),
+    0 10px 24px rgba(0,0,0,.06);
 }
 
 .menuSheetFieldHead {
-  padding:14px 16px 12px;
+  position:relative;
+  padding:18px 16px 14px;
   border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg, rgba(31,31,31,.03), transparent);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,250,252,.92)),
+    var(--surface);
+}
+
+.menuSheetFieldHead::before {
+  content:"";
+  position:absolute;
+  left:16px;
+  right:16px;
+  top:0;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--accent), rgba(255,255,255,0));
 }
 
 .menuSheetFieldTitle {
+  display:flex;
+  align-items:center;
+  gap:10px;
   font-size:17px;
   font-weight:900;
   color:var(--text);
+}
+
+.menuSheetFieldTitle::before {
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:var(--accent);
+  box-shadow:0 0 0 5px var(--accent-soft);
+  flex:0 0 auto;
 }
 
 .menuSheetFieldDesc {
   margin-top:6px;
   color:var(--muted);
   line-height:1.35;
+  font-size:13px;
 }
 
 .menuSheetDishList {
   display:flex;
   flex-direction:column;
+  background:var(--surface);
 }
 
 .menuSheetDishRow {
   display:grid;
-  grid-template-columns:minmax(0, 1fr) auto;
+  grid-template-columns:minmax(0, 1fr) 92px;
   gap:12px;
   align-items:start;
   padding:14px 16px;
   border-top:1px solid var(--line);
+  background:transparent;
+  cursor:pointer;
 }
 
 .menuSheetDishRow:first-child {
   border-top:0;
 }
 
+.menuSheetDishRow:hover {
+  background:var(--surface-soft);
+}
+
 .menuSheetDishMain {
   min-width:0;
 }
 
+.menuSheetDishTop {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
 .menuSheetDishName {
+  min-width:0;
   font-weight:800;
   color:var(--text);
+  font-size:15px;
+  line-height:1.25;
 }
 
 .menuSheetDishDesc {
@@ -767,14 +820,19 @@ button:active,
   color:var(--muted);
   font-size:13px;
   line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
 }
 
 .menuSheetDishExtras {
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-start;
   gap:12px;
   margin-top:10px;
+  flex-wrap:wrap;
 }
 
 .menuSheetDishAllergens {
@@ -823,12 +881,36 @@ button:active,
 
 .menuSheetDishAllergenCount {
   white-space:nowrap;
+  margin-left:auto;
 }
 
 .menuSheetDishPrice {
   font-weight:900;
   color:var(--text);
   white-space:nowrap;
+  font-size:16px;
+  flex:0 0 auto;
+  padding-left:8px;
+}
+
+.menuSheetDishMedia {
+  width:92px;
+  height:72px;
+  border-radius:10px;
+  border:var(--frame-width) solid var(--frame-border);
+  background:var(--chip);
+  overflow:hidden;
+  box-shadow:
+    0 0 0 calc(var(--frame-ring-width) * .4) var(--frame-ring),
+    0 0 0 1px var(--frame-shadow) inset;
+}
+
+.menuSheetDishThumb {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  background:var(--chip);
 }
 
 .menuSheetEmpty {
@@ -846,6 +928,15 @@ button:active,
 
   .menuSheetDishAllergenCount {
     min-height:28px;
+  }
+
+  .menuSheetDishRow {
+    grid-template-columns:minmax(0, 1fr) 80px;
+  }
+
+  .menuSheetDishMedia {
+    width:80px;
+    height:64px;
   }
 }
 

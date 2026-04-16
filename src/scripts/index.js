@@ -1050,6 +1050,45 @@ function renderMenuDishAllergens(plato) {
   `;
 }
 
+function renderMenuDishMedia(plato, fallbackId) {
+  const dishId = safeText(plato?.id).trim() || safeText(fallbackId).trim();
+  if (!dishId) return '<div class="menuSheetDishMedia" style="display:none"></div>';
+
+  return `
+    <div class="menuSheetDishMedia">
+      <img
+        class="menuSheetDishThumb"
+        data-menu-dish-image="${escapeHtml(dishId)}"
+        alt="${escapeHtml(safeText(plato?.plato || `Plato ${fallbackId}`))}"
+        loading="lazy"
+      />
+    </div>
+  `;
+}
+
+function hydrateMenuSheetDishImages() {
+  if (!menuSheetFields) return;
+
+  menuSheetFields.querySelectorAll("[data-menu-dish-image]").forEach((img) => {
+    const dishId = safeText(img.dataset.menuDishImage).trim();
+    const dish = PLATOS.find((item) => idsEqual(item?.id, dishId));
+    const media = img.closest(".menuSheetDishMedia");
+    const imgInfo = getDishImageInfo(dish);
+
+    if (!imgInfo.preferred) {
+      if (media instanceof HTMLElement) media.style.display = "none";
+      return;
+    }
+
+    applyDishImageWithFallback(img, {
+      ...imgInfo,
+      onFinalFail: () => {
+        if (media instanceof HTMLElement) media.style.display = "none";
+      },
+    });
+  });
+}
+
 function openMenuSheet(menu) {
   if (!menuSheet) return;
   pushHistoryState({ modal: "menu" });
@@ -1094,19 +1133,25 @@ function openMenuSheet(menu) {
               const dish = PLATOS.find((item) => idsEqual(item?.id, entry?.plato_id));
               const price = entry?.precio_override ?? dish?.precio;
               const dishAllergens = renderMenuDishAllergens(dish);
+              const dishMedia = renderMenuDishMedia(dish, entry?.plato_id);
               return `
-                <div class="menuSheetDishRow">
+                <article class="menuSheetDishRow" data-menu-dish-id="${escapeHtml(
+                  safeText(dish?.id || entry?.plato_id),
+                )}">
                   <div class="menuSheetDishMain">
-                    <div class="menuSheetDishName">${escapeHtml(
+                    <div class="menuSheetDishTop">
+                      <div class="menuSheetDishName">${escapeHtml(
                       safeText(dish?.plato || `Plato #${entry?.plato_id}`),
-                    )}</div>
+                      )}</div>
+                      <div class="menuSheetDishPrice">${formatPrice(price)}</div>
+                    </div>
                     <div class="menuSheetDishDesc">${escapeHtml(
                       safeText(dish?.descripcion || ""),
                     )}</div>
                     ${dishAllergens}
                   </div>
-                  <div class="menuSheetDishPrice">${formatPrice(price)}</div>
-                </div>
+                  ${dishMedia}
+                </article>
               `;
             })
             .join("");
@@ -1128,6 +1173,8 @@ function openMenuSheet(menu) {
           `;
         })
         .join("");
+
+      hydrateMenuSheetDishImages();
     }
   }
 
@@ -2247,6 +2294,18 @@ menuSheet?.addEventListener("click", (e) => {
       allergenTrigger.dataset.allergenSrc,
       allergenTrigger.dataset.allergenTitle || t("allergen"),
     );
+    return;
+  }
+
+  const dishTrigger = e.target?.closest?.("[data-menu-dish-id]");
+  if (dishTrigger?.dataset?.menuDishId) {
+    const dish = PLATOS.find((item) =>
+      idsEqual(item?.id, dishTrigger.dataset.menuDishId),
+    );
+    if (dish) {
+      closeGenericSheet(menuSheet);
+      openSheet(dish);
+    }
   }
 });
 
