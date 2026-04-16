@@ -3333,10 +3333,9 @@ function renderMenusCompuestosList() {
     const isActive = menu?.activo == null || Boolean(menu?.activo);
     const isPublished = menu?.publicado == null || Boolean(menu?.publicado);
     const weekdays = getMenuProgramacionWeekdays(menu?.id);
-    const fieldsCount = getMenuCamposByMenuId(menu?.id).length;
     const scheduleText = weekdays.length
       ? `Dias: ${formatMenuProgramacionSummary(menu?.id)}`
-      : "Siempre activo";
+      : "";
 
     const div = document.createElement("article");
     div.className = "menu-compuesto-item" + (isActive ? "" : " inactiva");
@@ -3347,12 +3346,11 @@ function renderMenusCompuestosList() {
           <div class="menu-row-title">${escapeHtml(safeText(menu?.nombre) || "Menu sin nombre")}</div>
           <div class="menu-row-desc">${escapeHtml(safeText(menu?.descripcion || ""))}</div>
         </div>
-        <div class="menu-row-price">${fieldsCount} campos</div>
       </div>
       <div class="menu-row-meta">
         <span class="menu-chip ${isActive ? "is-positive" : ""}">${isActive ? "Activo" : "Inactivo"}</span>
         <span class="menu-chip ${isPublished ? "is-positive" : ""}">${isPublished ? "Publicado" : "Oculto"}</span>
-        <span class="menu-chip ${weekdays.length ? "is-warning" : ""}">${escapeHtml(scheduleText)}</span>
+        ${scheduleText ? `<span class="menu-chip is-warning">${escapeHtml(scheduleText)}</span>` : ""}
       </div>
       <div class="card-actions menu-row-actions">
         <button class="btn-editar" type="button" data-action="edit" data-id="${escapeHtml(menu?.id)}">Editar</button>

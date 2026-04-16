@@ -193,10 +193,7 @@ const I18N = {
     info_secondary_default: "Wi‑Fi, Teléfono y Dirección",
     menus_section: "Menus destacados",
     menu_open: "Ver menu",
-    menu_always_available: "Disponible siempre",
     menu_today: "Hoy",
-    menu_available_days: "Disponible",
-    menu_courses: "campos",
     menu_no_fields: "Este menu todavia no tiene campos configurados.",
     ratings: "Valoraciones",
     stars: "Estrellas",
@@ -259,10 +256,7 @@ const I18N = {
     info_secondary_default: "Wi‑Fi, Phone and Address",
     menus_section: "Featured menus",
     menu_open: "View menu",
-    menu_always_available: "Available every day",
     menu_today: "Today",
-    menu_available_days: "Available",
-    menu_courses: "sections",
     menu_no_fields: "This menu has no configured sections yet.",
     ratings: "Ratings",
     stars: "Stars",
@@ -1105,20 +1099,8 @@ function openMenuSheet(menu) {
   }
 
   if (menuSheetMeta) {
-    const metaBits = [];
-    const weekdays = getMenuProgramacionWeekdays(menu?.id);
-    const fields = getMenuCamposByMenuId(menu?.id);
-    metaBits.push(
-      `<span class="menuSheetMetaPill">${fields.length} ${t("menu_courses")}</span>`,
-    );
-    metaBits.push(
-      `<span class="menuSheetMetaPill">${
-        weekdays.length
-          ? `${t("menu_available_days")}: ${weekdays.map((day) => getMenuWeekdayLabel(day)).join(", ")}`
-          : t("menu_always_available")
-      }</span>`,
-    );
-    menuSheetMeta.innerHTML = metaBits.join("");
+    menuSheetMeta.innerHTML = "";
+    menuSheetMeta.style.display = "none";
   }
 
   if (menuSheetFields) {
@@ -1293,12 +1275,6 @@ function closeSheet() {
 // =============================
 // Render
 // =============================
-function buildMenuScheduleLabel(menu) {
-  const weekdays = getMenuProgramacionWeekdays(menu?.id);
-  if (!weekdays.length) return t("menu_always_available");
-  return `${t("menu_available_days")}: ${weekdays.map((day) => getMenuWeekdayLabel(day)).join(", ")}`;
-}
-
 function renderHomeMenus() {
   if (!homeMenus) return;
   homeMenus.innerHTML = "";
@@ -1320,7 +1296,6 @@ function renderHomeMenus() {
   list.className = "homeMenusList";
 
   visibleMenus.forEach((menu) => {
-    const fields = getMenuCamposByMenuId(menu?.id);
     const card = document.createElement("button");
     card.type = "button";
     card.className = "homeMenuCard";
@@ -1332,14 +1307,9 @@ function renderHomeMenus() {
 
     const desc = document.createElement("div");
     desc.className = "homeMenuDesc";
-    desc.textContent = safeText(menu?.descripcion).trim() || buildMenuScheduleLabel(menu);
-
-    const meta = document.createElement("div");
-    meta.className = "homeMenuMeta";
-    meta.innerHTML = `
-      <span class="homeMenuMetaPill">${fields.length} ${t("menu_courses")}</span>
-      <span class="homeMenuMetaPill">${buildMenuScheduleLabel(menu)}</span>
-    `;
+    const description = safeText(menu?.descripcion).trim();
+    desc.textContent = description;
+    desc.style.display = description ? "" : "none";
 
     const action = document.createElement("div");
     action.className = "homeMenuAction";
@@ -1347,7 +1317,6 @@ function renderHomeMenus() {
 
     card.appendChild(name);
     card.appendChild(desc);
-    card.appendChild(meta);
     card.appendChild(action);
     list.appendChild(card);
   });
