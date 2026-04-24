@@ -249,6 +249,31 @@ body {
     color: #52627b;
 }
 
+:root[data-admin-theme="light"] .menu-editor-field {
+    border-color: rgba(17, 24, 39, 0.12);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+:root[data-admin-theme="light"] .menu-selected-dish-row {
+    border-color: rgba(17, 24, 39, 0.14);
+    background: rgba(17, 24, 39, 0.04);
+}
+
+:root[data-admin-theme="light"] .menu-selected-dish-name,
+:root[data-admin-theme="light"] .menu-dish-picker-name {
+    color: #111827;
+}
+
+:root[data-admin-theme="light"] .menu-selected-dish-meta,
+:root[data-admin-theme="light"] .menu-dish-picker-meta {
+    color: #52627b;
+}
+
+:root[data-admin-theme="light"] .menu-dish-picker-item {
+    border-color: rgba(17, 24, 39, 0.14);
+    background: rgba(255, 255, 255, 0.98);
+}
+
 :root[data-admin-theme="light"] .card-actions .btn-editar {
     color: #1e293b;
     border-color: rgba(17, 24, 39, 0.22);
