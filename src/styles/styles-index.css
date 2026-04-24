@@ -426,6 +426,7 @@ button:active,
   border:0;
   cursor:pointer;
   text-align:left;
+  color:var(--text);
   display:grid;
   grid-template-columns: 1fr 92px;
   gap:12px;
@@ -443,7 +444,7 @@ button:active,
 .miniBadges{display:flex; gap:4px; flex-shrink:0}
 .miniBadge{display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:999px; background:var(--chip); color:var(--text); font-size:12px; line-height:1}
 
-.dishName{font-weight:800; margin:0 0 4px; font-size:15.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-.01em; line-height:1.2}
+.dishName{font-weight:800; margin:0 0 4px; font-size:15.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-.01em; line-height:1.2}
 .dishDesc{color:var(--muted); font-size:var(--fs-body-sm); line-height:1.38; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .dishPrice{font-weight:800; margin-top:6px; font-feature-settings:"tnum" on; font-variant-numeric:tabular-nums lining-nums}
 .dishPrice{color:var(--text)}
