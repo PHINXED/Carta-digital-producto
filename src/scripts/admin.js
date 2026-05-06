@@ -7,7 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const db = supabase.schema("CartaDigitalLM");
 // Bucket recomendado para imágenes (Supabase Storage)
-const STORAGE_BUCKET = "imenu";
+const STORAGE_BUCKET = "CartaDigitalLM";
 const DEFAULT_PRIMARY_COLOR = "#FFE800";
 const ADMIN_THEME_STORAGE_KEY = "imenu.admin.primary_color";
 const ADMIN_THEME_MODE_STORAGE_KEY = "imenu.admin.theme";

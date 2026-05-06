@@ -12,7 +12,7 @@ El frontend del proyecto esta preparado para trabajar con:
 - tablas de carta: `CartaDigitalLM.Categorias` y `CartaDigitalLM.Menu`
 - tablas de menus compuestos: `CartaDigitalLM.Menus`, `Menus_programacion`, `Menus_campos`, `Menus_campos_platos`
 - vista publica: `CartaDigitalLM.Perfil_publico`
-- bucket de storage: `imenu`
+- bucket de storage: `CartaDigitalLM`
 
 ## Problemas ya detectados
 
@@ -158,7 +158,7 @@ El seed [bar-tropical-template.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMe
 
 ## Storage
 
-Si el admin sube imagenes, el bucket `imenu` necesita permisos y policies. El enfoque mas simple para este repo es:
+Si el admin sube imagenes, el bucket `CartaDigitalLM` necesita permisos y policies. El enfoque mas simple para este repo es:
 
 - permitir uso del schema `storage` a `authenticated`
 - permitir operar sobre `storage.objects` y `storage.buckets`

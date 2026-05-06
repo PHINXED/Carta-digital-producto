@@ -40,7 +40,7 @@ El panel:
 - lee y escribe `CartaDigitalLM.Perfil`
 - hace CRUD sobre `CartaDigitalLM.Categorias`
 - hace CRUD sobre `CartaDigitalLM.Menu`
-- sube imagenes al bucket `imenu`
+- sube imagenes al bucket `CartaDigitalLM`
 
 Si el admin muestra `permission denied for table Perfil`, el problema no esta en el frontend: faltan `GRANT` o policies RLS del owner sobre `CartaDigitalLM.Perfil`. El SQL para dejarlo bien esta en [supabase/setup-carta-digital.sql](</c:/Users/Maestry/Desktop/iCreate LOCAL/iMenu/supabase/setup-carta-digital.sql>).
 
